@@ -2,6 +2,8 @@
 node_modules/
 app/node_modules/
 legacy-vite/node_modules/
+package-lock.json
+**/package-lock.json
 
 # Build output
 dist/
