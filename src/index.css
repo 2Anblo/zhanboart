@@ -1,0 +1,460 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Template base colors */
+    --color-void: #0a0a0b;
+    --color-alabaster: #f5f4f0;
+    --color-stone: #e8e8e4;
+    --color-amber: #f25b29;
+    --color-phosphor: #5c2615;
+    --color-metal-light: #e6e7e9;
+    --color-metal-mid: #b0b2b5;
+    --color-metal-dark: #7a7c7f;
+    --color-main-text: #141414;
+    --color-inverse-text: #ffffff;
+    --page-padding: clamp(1.5rem, 5vw, 4rem);
+    --font-serif: 'Instrument Serif', Georgia, serif;
+    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-mono: 'Source Code Pro', monospace;
+
+    /* Night Room (Dark Mode) — 深夜房间 */
+    --night-bg: #090A0D;
+    --night-surface: #111217;
+    --night-text: #E6E1D8;
+    --night-muted: #8D8792;
+    --night-blue: #25324A;
+    --night-violet: #3B3147;
+    --night-wine: #4A2633;
+    --night-glow: rgba(177, 188, 216, 0.18);
+
+    /* Daydream (Light Mode) — 阳光明媚的梦 */
+    --day-bg: #FBF7EC;
+    --day-surface: #FFFDF6;
+    --day-text: #2A2926;
+    --day-muted: #7D7568;
+    --day-gold: #D8B15E;
+    --day-blue: #B8D7E8;
+    --day-rose: #E9C8B7;
+    --day-glow: rgba(255, 218, 142, 0.36);
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: var(--color-void);
+    color: var(--color-inverse-text);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.7;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+}
+
+/* ============================
+   CSS 3D Room Gallery
+   ============================ */
+
+.archive-container {
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  perspective: 2000px;
+  background: var(--color-void);
+}
+
+.archive-scroller {
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease-out;
+}
+
+.room {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  height: 100vh;
+  margin: -50vh 0 0 -50vw;
+  pointer-events: none;
+  opacity: 0;
+  transform-style: preserve-3d;
+}
+
+.room--current {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.room__side {
+  position: absolute;
+  display: flex;
+  align-items: center;
+}
+
+.room__side--back {
+  width: 100vw;
+  height: 100vh;
+  transform: translate3d(0, 0, -4000px) rotate3d(1, 0, 0, 0.1deg);
+  justify-content: center;
+}
+
+.room__side--right {
+  width: 4000px;
+  height: 100vh;
+  right: 0;
+  justify-content: flex-end;
+  transform: rotate3d(0, 1, 0, -90.03deg);
+  transform-origin: 100% 50%;
+}
+
+.room__side--left {
+  width: 4000px;
+  height: 100vh;
+  left: 0;
+  justify-content: flex-start;
+  transform: rotate3d(0, 1, 0, 90deg);
+  transform-origin: 0 50%;
+}
+
+.room__side--top {
+  width: 100vw;
+  height: 4000px;
+  bottom: 100%;
+  transform: rotate3d(1, 0, 0, -90deg) translate3d(0, 4000px, 0);
+  transform-origin: 50% 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.06) 40%,
+    rgba(255, 255, 255, 0.1) 100%
+  ) !important;
+  backdrop-filter: blur(1px);
+  border-bottom: 1.5px solid rgba(0, 0, 0, 0.2);
+}
+
+.room__side--bottom {
+  width: 100vw;
+  height: 4000px;
+  top: 100%;
+  transform: rotate3d(1, 0, 0, 90deg) translate3d(0, -4000px, 0);
+  transform-origin: 50% 0%;
+}
+
+.room__side img {
+  max-width: 40%;
+  max-height: 60%;
+  transform: translate3d(0, 0, 10px);
+  backface-visibility: hidden;
+  object-fit: cover;
+}
+
+.room__side--back img {
+  margin: 0 5%;
+}
+
+.room__side--left img {
+  margin: 0 0 0 25%;
+}
+
+.room__side--right img {
+  margin: 0 25% 0 0;
+}
+
+/* Wall edge lines — visible seams between walls */
+.room__side--back {
+  border-left: 2px solid rgba(0, 0, 0, 0.4);
+  border-right: 2px solid rgba(0, 0, 0, 0.4);
+  border-top: 2px solid rgba(0, 0, 0, 0.35);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.25);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+.room__side--left {
+  border-right: 2px solid rgba(0, 0, 0, 0.4);
+  border-top: 2px solid rgba(0, 0, 0, 0.3);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.25);
+}
+.room__side--right {
+  border-left: 2px solid rgba(0, 0, 0, 0.4);
+  border-top: 2px solid rgba(0, 0, 0, 0.3);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.25);
+}
+
+/* Room wall colors */
+.room--monk .room__side { background: #d5d0c8; }
+.room--lighthouse .room__side { background: #1a3a5c; }
+.room--orlando .room__side { background: #c8a82e; }
+.room--waves .room__side { background: #8b2525; }
+
+/* Archive content overlay */
+.archive-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  padding-bottom: 8vh;
+}
+
+.archive-content[data-theme="light"] .archive-title,
+.archive-content[data-theme="light"] .archive-subtitle,
+.archive-content[data-theme="light"] .archive-meta {
+  color: #141414;
+}
+
+.archive-content[data-theme="dark"] .archive-title,
+.archive-content[data-theme="dark"] .archive-subtitle,
+.archive-content[data-theme="dark"] .archive-meta {
+  color: #ffffff;
+}
+
+.archive-title {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 7vw, 6rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  text-align: center;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+  transition: color 0.3s ease;
+}
+
+.archive-subtitle {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  opacity: 0.7;
+  margin-top: 0.75rem;
+  transition: opacity 0.2s ease, color 0.3s ease;
+}
+
+.archive-meta {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.45;
+  margin-top: 1.5rem;
+  text-align: center;
+  line-height: 2.2;
+  transition: color 0.3s ease;
+}
+
+/* Navigation arrows */
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  z-index: 10;
+  pointer-events: auto;
+  color: #ffffff;
+  opacity: 0.6;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.nav-arrow:hover {
+  opacity: 1;
+}
+
+.nav-arrow--left {
+  left: 2rem;
+}
+
+.nav-arrow--left:hover {
+  transform: translateY(-50%) translateX(-4px);
+}
+
+.nav-arrow--right {
+  right: 2rem;
+}
+
+.nav-arrow--right:hover {
+  transform: translateY(-50%) translateX(4px);
+}
+
+/* ============================
+   Liquid Glass Panel
+   ============================ */
+
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.01);
+  backdrop-filter: blur(2px) saturate(140%);
+  -webkit-backdrop-filter: blur(2px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.1),
+    0 8px 32px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.liquid-glass::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  mask: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%);
+  -webkit-mask: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 100%);
+  pointer-events: none;
+}
+
+/* ============================
+   Section Label
+   ============================ */
+
+.section-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--color-metal-dark);
+  line-height: 1;
+}
+
+/* ============================
+   Ticker Line
+   ============================ */
+
+.ticker-line {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-inverse-text);
+  letter-spacing: 0.08em;
+}
+
+/* ============================
+   Selection
+   ============================ */
+
+::selection {
+  background: var(--color-amber);
+  color: var(--color-inverse-text);
+}
+
+/* Markdown content surfaces */
+.content-shell {
+  min-height: 100vh;
+  background: var(--color-void);
+  color: var(--color-inverse-text);
+  padding: 8rem var(--page-padding) 5rem;
+}
+
+.content-inner {
+  width: min(920px, 100%);
+  margin: 0 auto;
+}
+
+.content-kicker {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.content-title {
+  font-family: var(--font-serif);
+  font-size: clamp(3rem, 10vw, 8rem);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: 0;
+  margin: 1rem 0 2rem;
+}
+
+.entry-list {
+  display: grid;
+  gap: 1rem;
+}
+
+.entry-card {
+  display: block;
+  padding: 1.5rem 0;
+  color: inherit;
+  text-decoration: none;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.entry-card h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 5vw, 4rem);
+  font-weight: 400;
+  line-height: 1;
+  margin: 0.35rem 0;
+}
+
+.entry-card p,
+.entry-meta {
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.markdown-body {
+  width: min(760px, 100%);
+  margin: 0 auto;
+  font-size: 1.08rem;
+  line-height: 1.9;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.1;
+}
+
+.markdown-body h1 { font-size: clamp(3rem, 8vw, 6rem); }
+.markdown-body h2 { font-size: clamp(2rem, 5vw, 3.5rem); margin-top: 3rem; }
+.markdown-body p { margin: 1.4rem 0; }
+.markdown-body a { color: var(--color-amber); }
+.markdown-body img { width: 100%; height: auto; margin: 2rem 0; }
+.markdown-body blockquote {
+  margin: 2rem 0;
+  padding-left: 1.2rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.28);
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.photo-card img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+
+.archive-year {
+  margin-top: 3rem;
+  font-family: var(--font-serif);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  font-weight: 400;
+}

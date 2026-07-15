@@ -1,10 +1,12 @@
-﻿# Dependencies
+# Dependencies
 node_modules/
 app/node_modules/
+legacy-vite/node_modules/
 
 # Build output
 dist/
 app/dist/
+legacy-vite/dist/
 dist-ssr/
 app/dist-ssr/
 .next/
