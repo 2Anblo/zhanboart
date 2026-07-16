@@ -10,8 +10,11 @@ import LighthouseVideo from "@/sections/LighthouseVideo";
 import ImageGallery from "@/sections/ImageGallery";
 import WavesVideo from "@/sections/WavesVideo";
 import FooterTicker from "@/sections/FooterTicker";
+import type { ContentEntry } from "@/lib/content";
 
-export default function HomeExperience() {
+type HomeEntry = Omit<ContentEntry, "content">;
+
+export default function HomeExperience({ recentEntries }: { recentEntries: HomeEntry[] }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const lenisRef = useLenis();
 
@@ -35,7 +38,7 @@ export default function HomeExperience() {
       <Navigation onMenuOpen={handleMenuOpen} />
       <FullScreenMenu isOpen={menuOpen} onClose={handleMenuClose} onNavigate={handleNavigate} />
       <main>
-        <HeroRoomGallery />
+        <HeroRoomGallery entries={recentEntries} />
         <ParticleSculpture />
         <LighthouseVideo />
         <ImageGallery />

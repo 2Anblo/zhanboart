@@ -27,7 +27,7 @@ export const navigationConfig: NavigationConfig = {
   menuLabel: "菜单",
   closeLabel: "关闭",
   fullscreenMenuLinks: [
-    { label: "房间", target: "hero" },
+    { label: "入口", target: "hero" },
     { label: "日志", target: "consciousness" },
     { label: "笔记", target: "lighthouse" },
     { label: "照片", target: "waves-gallery" },
