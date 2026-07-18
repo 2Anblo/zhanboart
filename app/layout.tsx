@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "@/index.css";
 import ThemeProvider from "@/components/ThemeProvider";
+import FluidCursor from "@/components/FluidCursor";
 
 export const metadata: Metadata = {
   title: "zhanbo.art",
@@ -29,7 +30,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+          <FluidCursor />
+        </ThemeProvider>
       </body>
     </html>
   );
