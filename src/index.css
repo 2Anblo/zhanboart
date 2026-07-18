@@ -154,6 +154,43 @@
   mask-image: radial-gradient(circle at center, black, transparent 82%);
 }
 
+/* Hero Figure — boy at desk */
+.hero-figure {
+  position: absolute;
+  right: 6vw;
+  bottom: 8vh;
+  width: min(22rem, 34vw);
+  height: auto;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.72;
+  animation: figureFloat 10s ease-in-out infinite alternate;
+}
+
+.hero-figure svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hero-figure--dark {
+  color: rgba(230, 225, 216, 0.78);
+}
+
+.hero-figure--light {
+  display: none;
+  color: rgba(42, 41, 38, 0.65);
+}
+
+@keyframes figureFloat {
+  from {
+    transform: translate3d(0, 0, 0) rotate(-0.2deg);
+  }
+  to {
+    transform: translate3d(0, -0.5rem, 0) rotate(0.2deg);
+  }
+}
+
 .quiet-hero__inner {
   position: relative;
   z-index: 1;
@@ -302,6 +339,14 @@
     display: block;
   }
 
+  .hero-figure--dark {
+    display: none;
+  }
+
+  .hero-figure--light {
+    display: block;
+  }
+
   .quiet-hero__window {
     background:
       linear-gradient(90deg, transparent 48%, rgba(216, 177, 94, 0.12) 49%, rgba(216, 177, 94, 0.12) 51%, transparent 52%),
@@ -350,6 +395,13 @@
     opacity: 0.38;
   }
 
+  .hero-figure {
+    right: 2vw;
+    bottom: 4vh;
+    width: min(16rem, 42vw);
+    opacity: 0.5;
+  }
+
   .quiet-hero__inner {
     grid-template-columns: 1fr;
     align-content: end;
@@ -363,6 +415,11 @@
 }
 
 @media (max-width: 560px) {
+  .hero-figure {
+    width: min(12rem, 38vw);
+    opacity: 0.35;
+  }
+
   .quiet-hero__inner {
     padding-bottom: 2.25rem;
   }
@@ -378,6 +435,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .quiet-hero__window {
+    animation: none;
+  }
+  .hero-figure {
     animation: none;
   }
 }

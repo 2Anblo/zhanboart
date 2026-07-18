@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import type { ContentEntry, ContentType } from "@/lib/content";
+import FigureDark from "@/components/hero/FigureDark";
+import FigureLight from "@/components/hero/FigureLight";
 
 type HeroEntry = Omit<ContentEntry, "content">;
 
@@ -18,6 +20,8 @@ export default function HeroRoomGallery({ entries }: { entries: HeroEntry[] }) {
         <div className="quiet-hero__image quiet-hero__image--night" />
         <div className="quiet-hero__image quiet-hero__image--day" />
         <div className="quiet-hero__window" />
+        <div className="hero-figure hero-figure--dark"><FigureDark /></div>
+        <div className="hero-figure hero-figure--light"><FigureLight /></div>
         <div className="quiet-hero__grain" />
       </div>
 
