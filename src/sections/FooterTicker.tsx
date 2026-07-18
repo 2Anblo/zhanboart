@@ -3,6 +3,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { footerConfig } from '../config';
+import { useTheme } from '@/components/ThemeProvider';
 
 function getRandomChar() {
   const isDigit = Math.random() < 0.3;
@@ -28,6 +29,8 @@ export default function FooterTicker() {
   const linesRef = useRef<LineState[]>([]);
   const rafRef = useRef<number>(0);
   const startLineCycleRef = useRef<((state: LineState, delay: number) => void) | null>(null);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   const DICTIONARY = footerConfig.tickerWords;
 
@@ -41,9 +44,10 @@ export default function FooterTicker() {
       const progressA = rateA.value * chars;
       const progressB = rateB.value * chars;
 
+      const invisibleColor = isLight ? '#fbf7ec' : '#0a0a0b';
       if (i < progressB) {
         // Behind rateB: invisible
-        html += '<span style="color:#0a0a0b">_</span>';
+        html += `<span style="color:${invisibleColor}">_</span>`;
       } else if (i >= wordStart && i < wordEnd && i < progressA) {
         // Word area already swept: show real letter
         const letterIndex = i - wordStart;
@@ -53,14 +57,14 @@ export default function FooterTicker() {
         html += getRandomChar();
       } else if (i < progressA) {
         // Already swept, not word, not in noise band: invisible
-        html += '<span style="color:#0a0a0b">_</span>';
+        html += `<span style="color:${invisibleColor}">_</span>`;
       } else if (i >= wordStart && i < wordEnd) {
         // Word area not yet swept: show real letter
         const letterIndex = i - wordStart;
         html += word[letterIndex];
       } else {
         // Not swept, not word: invisible
-        html += '<span style="color:#0a0a0b">_</span>';
+        html += `<span style="color:${invisibleColor}">_</span>`;
       }
     }
 
@@ -198,19 +202,27 @@ export default function FooterTicker() {
     return null;
   }
 
+  const bgColor = isLight ? 'var(--day-surface)' : '#0a0a0b';
+  const headingColor = isLight ? 'var(--day-muted)' : '#7a7c7f';
+  const linkColor = isLight ? 'var(--day-muted)' : '#b0b2b5';
+  const linkHoverColor = isLight ? 'var(--day-text)' : '#ffffff';
+  const hrColor = isLight ? 'rgba(42,41,38,0.08)' : 'rgba(255,255,255,0.06)';
+  const tickerTextColor = isLight ? 'var(--day-text)' : 'var(--color-inverse-text)';
+
   return (
     <footer
       id="footer"
       style={{
-        background: '#0a0a0b',
+        background: bgColor,
         padding: '10rem var(--page-padding) 4rem',
+        transition: 'background-color 0.5s ease',
       }}
     >
       {/* Top half — Site links */}
       {footerConfig.linkColumns.length > 0 && (
         <div
-          className="mx-auto grid grid-cols-2 gap-16"
-          style={{ maxWidth: '1400px' }}
+          className="mx-auto grid gap-16 footer-links"
+          style={{ maxWidth: '1400px', gridTemplateColumns: 'repeat(2, 1fr)' }}
         >
           {footerConfig.linkColumns.map((col, colIdx) => (
             <div key={colIdx}>
@@ -222,7 +234,7 @@ export default function FooterTicker() {
                     fontWeight: 400,
                     textTransform: 'uppercase',
                     letterSpacing: '0.15em',
-                    color: '#7a7c7f',
+                    color: headingColor,
                     marginBottom: '1rem',
                   }}
                 >
@@ -234,14 +246,16 @@ export default function FooterTicker() {
                   <a
                     href="#hero"
                     onClick={(e) => e.preventDefault()}
-                    className="block no-underline transition-colors duration-300 hover:text-white"
+                    className="block no-underline transition-colors duration-300"
                     style={{
                       fontFamily: 'var(--font-sans)',
                       fontWeight: 300,
                       fontSize: '14px',
-                      color: '#b0b2b5',
+                      color: linkColor,
                       lineHeight: 2.2,
                     }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = linkHoverColor; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = linkColor; }}
                   >
                     {link}
                   </a>
@@ -258,14 +272,14 @@ export default function FooterTicker() {
         style={{
           maxWidth: '1400px',
           height: '1px',
-          background: 'rgba(255,255,255,0.06)',
+          background: hrColor,
           margin: '6rem auto',
         }}
       />
 
       {/* Bottom half — Terminal ticker */}
       {footerConfig.tickerWords.length > 0 && (
-        <div ref={tickerRef}>
+        <div ref={tickerRef} style={{ color: tickerTextColor }}>
           {Array.from({ length: 30 }).map((_, i) => (
             <div key={i} className="ticker-line" />
           ))}
@@ -280,7 +294,7 @@ export default function FooterTicker() {
             marginTop: '4rem',
             fontFamily: 'var(--font-sans)',
             fontSize: '11px',
-            color: '#7a7c7f',
+            color: headingColor,
           }}
         >
           {footerConfig.copyright}

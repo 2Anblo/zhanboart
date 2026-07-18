@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import * as THREE from 'three';
 import { particleConfig } from '../config';
+import { useTheme } from '@/components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -74,19 +75,35 @@ void main() {
 }
 `;
 
-const fragmentShader = `
+const fragmentShaderDark = `
 varying float vNoise;
 
 void main() {
   vec2 xy = gl_PointCoord.xy - vec2(0.5);
   float ll = length(xy);
   if (ll > 0.5) discard;
-  vec3 colorMain = vec3(0.05, 0.05, 0.05);
-  vec3 colorShadow = vec3(0.3, 0.35, 0.35);
+  vec3 colorMain = vec3(0.82, 0.80, 0.76);
+  vec3 colorShadow = vec3(0.45, 0.48, 0.52);
   vec3 finalColor = mix(colorShadow, colorMain, vNoise + 0.5);
   float alpha = (0.5 - ll) * 2.0;
   alpha *= smoothstep(-1.0, 0.5, vNoise);
-  gl_FragColor = vec4(finalColor, alpha * 0.9);
+  gl_FragColor = vec4(finalColor, alpha * 0.75);
+}
+`;
+
+const fragmentShaderLight = `
+varying float vNoise;
+
+void main() {
+  vec2 xy = gl_PointCoord.xy - vec2(0.5);
+  float ll = length(xy);
+  if (ll > 0.5) discard;
+  vec3 colorMain = vec3(0.12, 0.12, 0.14);
+  vec3 colorShadow = vec3(0.38, 0.38, 0.42);
+  vec3 finalColor = mix(colorShadow, colorMain, vNoise + 0.5);
+  float alpha = (0.5 - ll) * 2.0;
+  alpha *= smoothstep(-1.0, 0.5, vNoise);
+  gl_FragColor = vec4(finalColor, alpha * 0.7);
 }
 `;
 
@@ -94,6 +111,8 @@ export default function ParticleSculpture() {
   const sectionRef = useRef<HTMLElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const container = canvasContainerRef.current;
@@ -101,7 +120,8 @@ export default function ParticleSculpture() {
 
     // Three.js setup
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0xf5f4f0, 0.035);
+    const fogColor = isLight ? 0xf5f4f0 : 0x090a0d;
+    scene.fog = new THREE.FogExp2(fogColor, 0.035);
 
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
     camera.position.set(0, 0, 14);
@@ -126,7 +146,7 @@ export default function ParticleSculpture() {
         uTime: { value: 0 },
       },
       vertexShader,
-      fragmentShader,
+      fragmentShader: isLight ? fragmentShaderLight : fragmentShaderDark,
     });
 
     const mesh = new THREE.Points(geometry, material);
@@ -140,10 +160,10 @@ export default function ParticleSculpture() {
     }
     dustGeometry.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
     const dustMaterial = new THREE.PointsMaterial({
-      color: 0x222222,
+      color: isLight ? 0x999999 : 0x888888,
       size: 0.03,
       transparent: true,
-      opacity: 0.4,
+      opacity: isLight ? 0.3 : 0.25,
     });
     const dust = new THREE.Points(dustGeometry, dustMaterial);
     scene.add(dust);
@@ -254,14 +274,19 @@ export default function ParticleSculpture() {
     return null;
   }
 
+  const bgColor = isLight ? '#f5f4f0' : 'var(--night-bg)';
+  const textColor = isLight ? '#141414' : 'var(--night-text)';
+  const sectionLabelColor = isLight ? 'var(--day-muted)' : 'var(--night-muted)';
+
   return (
     <section
       id="consciousness"
       ref={sectionRef}
       style={{
-        background: '#f5f4f0',
+        background: bgColor,
         minHeight: '100vh',
         padding: '12rem var(--page-padding)',
+        transition: 'background-color 0.5s ease',
       }}
     >
       <div
@@ -271,7 +296,10 @@ export default function ParticleSculpture() {
         {/* Left column — Editorial text */}
         <div ref={textRef} className="w-full md:w-[45%]">
           {particleConfig.sectionLabel && (
-            <div className="section-label animate-in" style={{ marginBottom: '2rem' }}>
+            <div
+              className="section-label animate-in"
+              style={{ marginBottom: '2rem', color: sectionLabelColor }}
+            >
               {particleConfig.sectionLabel}
             </div>
           )}
@@ -282,10 +310,11 @@ export default function ParticleSculpture() {
               style={{
                 fontFamily: 'var(--font-serif)',
                 fontSize: 'clamp(2rem, 5vw, 4rem)',
-                color: '#141414',
+                color: textColor,
                 lineHeight: 1.05,
                 letterSpacing: '-0.02em',
                 marginBottom: '3rem',
+                transition: 'color 0.5s ease',
               }}
             >
               {particleConfig.title}
@@ -300,9 +329,10 @@ export default function ParticleSculpture() {
                 fontFamily: 'var(--font-sans)',
                 fontWeight: 300,
                 fontSize: '16px',
-                color: '#141414',
+                color: textColor,
                 lineHeight: 1.7,
                 marginBottom: '2rem',
+                transition: 'color 0.5s ease',
               }}
               dangerouslySetInnerHTML={{ __html: text }}
             />
@@ -315,11 +345,12 @@ export default function ParticleSculpture() {
                 fontFamily: 'var(--font-serif)',
                 fontStyle: 'italic',
                 fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
-                color: '#141414',
+                color: textColor,
                 lineHeight: 1.1,
                 borderLeft: '2px solid #f25b29',
                 paddingLeft: '2rem',
                 margin: '4rem 0',
+                transition: 'color 0.5s ease',
               }}
             >
               {particleConfig.quote}

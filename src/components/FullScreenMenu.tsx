@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { navigationConfig } from '../config';
+import { useTheme } from '@/components/ThemeProvider';
 
 interface FullScreenMenuProps {
   isOpen: boolean;
@@ -11,6 +12,8 @@ interface FullScreenMenuProps {
 }
 
 export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScreenMenuProps) {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
   const overlayRef = useRef<HTMLDivElement>(null);
   const linksRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
@@ -57,11 +60,16 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
 
   if (navigationConfig.fullscreenMenuLinks.length === 0) return null;
 
+  const bgColor = isLight ? 'var(--day-bg)' : '#0a0a0b';
+  const textColor = isLight ? 'var(--day-text)' : '#ffffff';
+  const borderColor = isLight ? 'rgba(42,41,38,0.25)' : 'rgba(255,255,255,0.3)';
+  const mutedColor = isLight ? 'var(--day-muted)' : '#7a7c7f';
+
   return (
     <div
       ref={overlayRef}
       className="fixed inset-0 z-[200] hidden"
-      style={{ background: '#0a0a0b' }}
+      style={{ background: bgColor, transition: 'background-color 0.3s ease' }}
     >
       {navigationConfig.closeLabel && (
         <button
@@ -73,17 +81,17 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
             fontWeight: 400,
             textTransform: 'uppercase',
             letterSpacing: '0.15em',
-            color: '#ffffff',
-            border: '1px solid rgba(255,255,255,0.3)',
+            color: textColor,
+            border: `1px solid ${borderColor}`,
             borderRadius: '20px',
             padding: '8px 20px',
-            transition: 'border-color 0.3s ease',
+            transition: 'border-color 0.3s ease, color 0.3s ease',
           }}
           onMouseEnter={(e) => {
             (e.currentTarget as HTMLButtonElement).style.borderColor = '#f25b29';
           }}
           onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.3)';
+            (e.currentTarget as HTMLButtonElement).style.borderColor = borderColor;
           }}
         >
           {navigationConfig.closeLabel}
@@ -101,11 +109,12 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
                 style={{
                   fontFamily: 'var(--font-serif)',
                   fontSize: 'clamp(2rem, 4vw, 3.5rem)',
-                  color: '#ffffff',
+                  color: textColor,
                   lineHeight: 1.8,
                   border: 'none',
                   position: 'relative',
                   display: 'inline-block',
+                  transition: 'color 0.3s ease',
                 }}
               >
                 <span className="relative">
@@ -129,7 +138,7 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
                     fontSize: '13px',
                     letterSpacing: '0.08em',
                     lineHeight: 1.4,
-                    color: '#7a7c7f',
+                    color: mutedColor,
                   }}
                 >
                   <div>{info}</div>

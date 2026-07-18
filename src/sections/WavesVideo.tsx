@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { wavesVideoConfig } from '../config';
+import { useTheme } from '@/components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,6 +12,8 @@ export default function WavesVideo() {
   const sectionRef = useRef<HTMLElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -45,13 +48,16 @@ export default function WavesVideo() {
 
   if (!wavesVideoConfig.videoPath && !wavesVideoConfig.sectionLabel) return null;
 
+  const bgColor = isLight ? 'var(--day-bg)' : '#0a0a0b';
+
   return (
     <section
       id="waves-video"
       ref={sectionRef}
       style={{
-        background: '#0a0a0b',
+        background: bgColor,
         padding: '8rem var(--page-padding) 12rem',
+        transition: 'background-color 0.5s ease',
       }}
     >
       {wavesVideoConfig.sectionLabel && (
@@ -64,8 +70,7 @@ export default function WavesVideo() {
         ref={containerRef}
         className="mx-auto relative"
         style={{
-          width: '90vw',
-          maxWidth: '1600px',
+          width: 'min(90vw, 1600px)',
           aspectRatio: '16/9',
           overflow: 'hidden',
           opacity: 0,
@@ -91,7 +96,9 @@ export default function WavesVideo() {
           style={{
             padding: '4rem',
             opacity: 0,
-            background: 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)',
+            background: isLight
+              ? 'linear-gradient(to top, rgba(251,247,236,0.6) 0%, transparent 100%)'
+              : 'linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 100%)',
           }}
         >
           {wavesVideoConfig.title && (
@@ -99,10 +106,11 @@ export default function WavesVideo() {
               style={{
                 fontFamily: 'var(--font-serif)',
                 fontSize: 'clamp(2rem, 5vw, 4.5rem)',
-                color: '#ffffff',
+                color: isLight ? 'var(--day-text)' : '#ffffff',
                 lineHeight: 1.1,
                 letterSpacing: '-0.02em',
-                textShadow: '0 2px 30px rgba(0,0,0,0.6)',
+                textShadow: isLight ? 'none' : '0 2px 30px rgba(0,0,0,0.6)',
+                transition: 'color 0.5s ease',
               }}
             >
               {wavesVideoConfig.title}

@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { siteConfig, navigationConfig } from '../config';
+import ThemeToggle from '@/components/ThemeToggle';
+import { useTheme } from '@/components/ThemeProvider';
 
 interface NavigationProps {
   onMenuOpen: () => void;
@@ -11,15 +13,8 @@ interface NavigationProps {
 export default function Navigation({ onMenuOpen }: NavigationProps) {
   const navRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLAnchorElement>(null);
-  const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > window.innerHeight * 0.8);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const logo = logoRef.current;
@@ -51,14 +46,18 @@ export default function Navigation({ onMenuOpen }: NavigationProps) {
 
   if (!siteConfig.brandName && !navigationConfig.menuLabel) return null;
 
+  const textColor = isLight ? 'var(--day-text)' : '#ffffff';
+  const borderColor = isLight ? 'rgba(42,41,38,0.25)' : 'rgba(255,255,255,0.3)';
+  const borderHover = '#f25b29';
+  const textShadow = isLight ? 'none' : '0 2px 8px rgba(0,0,0,0.5)';
+
   return (
     <nav
       ref={navRef}
       className="fixed top-0 left-0 right-0 z-[100] flex items-center justify-between px-8 py-6"
       style={{
-        textShadow: '0 2px 8px rgba(0,0,0,0.5)',
-        mixBlendMode: scrolled ? 'difference' : 'normal',
-        transition: 'mix-blend-mode 0.5s ease',
+        textShadow,
+        transition: 'color 0.5s ease',
       }}
     >
       <a
@@ -69,9 +68,10 @@ export default function Navigation({ onMenuOpen }: NavigationProps) {
         style={{
           fontFamily: "var(--font-serif)",
           fontSize: '24px',
-          color: '#ffffff',
+          color: textColor,
           display: 'inline-flex',
           perspective: '200px',
+          transition: 'color 0.5s ease',
         }}
       >
         {siteConfig.brandName.split('').map((char, i) => (
@@ -85,33 +85,35 @@ export default function Navigation({ onMenuOpen }: NavigationProps) {
         ))}
       </a>
 
-      {navigationConfig.menuLabel && (
-        <button
-          onClick={onMenuOpen}
-          className="cursor-pointer bg-transparent"
-          style={{
-            fontFamily: 'var(--font-sans)',
-            fontSize: '11px',
-            fontWeight: 400,
-            textTransform: 'uppercase',
-            letterSpacing: '0.15em',
-            color: '#ffffff',
-            border: '1px solid rgba(255,255,255,0.3)',
-            borderRadius: '20px',
-            padding: '8px 20px',
-            transition: 'border-color 0.3s ease',
-          }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = '#f25b29';
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.borderColor = 'rgba(255,255,255,0.3)';
-          }}
-        >
-          {navigationConfig.menuLabel}
-        </button>
-      )}
+      <div className="flex items-center gap-3">
+        <ThemeToggle />
+        {navigationConfig.menuLabel && (
+          <button
+            onClick={onMenuOpen}
+            className="cursor-pointer bg-transparent"
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: '11px',
+              fontWeight: 400,
+              textTransform: 'uppercase',
+              letterSpacing: '0.15em',
+              color: textColor,
+              border: `1px solid ${borderColor}`,
+              borderRadius: '20px',
+              padding: '8px 20px',
+              transition: 'border-color 0.3s ease, color 0.5s ease',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = borderHover;
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = borderColor;
+            }}
+          >
+            {navigationConfig.menuLabel}
+          </button>
+        )}
+      </div>
     </nav>
   );
 }
-

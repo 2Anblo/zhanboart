@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { lighthouseVideoConfig } from '../config';
+import { useTheme } from '@/components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,6 +12,8 @@ export default function LighthouseVideo() {
   const sectionRef = useRef<HTMLElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -78,6 +81,9 @@ export default function LighthouseVideo() {
             width: 'min(600px, 80vw)',
             padding: '3rem',
             opacity: 0,
+            background: isLight ? 'rgba(255,253,246,0.5)' : 'rgba(255, 255, 255, 0.01)',
+            borderColor: isLight ? 'rgba(42,41,38,0.1)' : 'rgba(255, 255, 255, 0.08)',
+            color: isLight ? 'var(--day-text)' : '#ffffff',
           }}
         >
           {lighthouseVideoConfig.sectionLabel && (
@@ -88,7 +94,7 @@ export default function LighthouseVideo() {
                 fontWeight: 400,
                 textTransform: 'uppercase',
                 letterSpacing: '0.15em',
-                color: 'rgba(255,255,255,0.5)',
+                color: isLight ? 'rgba(42,41,38,0.5)' : 'rgba(255,255,255,0.5)',
                 marginBottom: '2rem',
               }}
             >
@@ -106,7 +112,7 @@ export default function LighthouseVideo() {
                     fontFamily: 'var(--font-mono)',
                     fontSize: '13px',
                     letterSpacing: '0.08em',
-                    color: '#ffffff',
+                    color: isLight ? 'var(--day-text)' : '#ffffff',
                     lineHeight: 1.4,
                   }}
                 >
@@ -121,7 +127,7 @@ export default function LighthouseVideo() {
             style={{
               width: '60%',
               height: '1px',
-              background: 'rgba(255,255,255,0.1)',
+              background: isLight ? 'rgba(42,41,38,0.1)' : 'rgba(255,255,255,0.1)',
               marginTop: '2rem',
               marginBottom: '1.5rem',
             }}
@@ -135,7 +141,7 @@ export default function LighthouseVideo() {
                 fontWeight: 300,
                 fontStyle: 'italic',
                 fontSize: '14px',
-                color: 'rgba(255,255,255,0.6)',
+                color: isLight ? 'rgba(42,41,38,0.6)' : 'rgba(255,255,255,0.6)',
                 lineHeight: 1.7,
                 textAlign: 'center',
               }}

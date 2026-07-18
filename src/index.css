@@ -48,8 +48,8 @@
   body {
     margin: 0;
     padding: 0;
-    background-color: var(--color-void);
-    color: var(--color-inverse-text);
+    background-color: var(--night-bg);
+    color: var(--night-text);
     font-family: var(--font-sans);
     font-weight: 300;
     font-size: 16px;
@@ -58,6 +58,12 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+
+  html.light body {
+    background-color: var(--day-bg);
+    color: var(--day-text);
   }
 }
 
@@ -305,80 +311,78 @@
   }
 }
 
-@media (prefers-color-scheme: light) {
-  .quiet-hero {
-    background:
-      radial-gradient(circle at 18% 16%, rgba(255, 218, 142, 0.34), transparent 26rem),
-      linear-gradient(140deg, #fbf7ec 0%, #fffdf6 48%, #eef7fb 100%);
-    color: var(--day-text);
-  }
+html.light .quiet-hero {
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 218, 142, 0.34), transparent 26rem),
+    linear-gradient(140deg, #fbf7ec 0%, #fffdf6 48%, #eef7fb 100%);
+  color: var(--day-text);
+}
 
-  .quiet-hero::after {
-    background: linear-gradient(90deg, transparent, rgba(42, 41, 38, 0.18), transparent);
-  }
+html.light .quiet-hero::after {
+  background: linear-gradient(90deg, transparent, rgba(42, 41, 38, 0.18), transparent);
+}
 
-  .quiet-hero__scene::before {
-    background:
-      linear-gradient(110deg, rgba(255, 255, 255, 0.2), transparent 46%),
-      radial-gradient(circle at 72% 20%, rgba(184, 215, 232, 0.34), transparent 32rem),
-      radial-gradient(circle at 52% 116%, rgba(216, 177, 94, 0.2), transparent 34rem);
-  }
+html.light .quiet-hero__scene::before {
+  background:
+    linear-gradient(110deg, rgba(255, 255, 255, 0.2), transparent 46%),
+    radial-gradient(circle at 72% 20%, rgba(184, 215, 232, 0.34), transparent 32rem),
+    radial-gradient(circle at 52% 116%, rgba(216, 177, 94, 0.2), transparent 34rem);
+}
 
-  .quiet-hero__image {
-    border-color: rgba(42, 41, 38, 0.08);
-    box-shadow: 0 28px 80px rgba(125, 117, 104, 0.18);
-    opacity: 0.24;
-    filter: saturate(0.8) contrast(0.86) brightness(1.08);
-  }
+html.light .quiet-hero__image {
+  border-color: rgba(42, 41, 38, 0.08);
+  box-shadow: 0 28px 80px rgba(125, 117, 104, 0.18);
+  opacity: 0.24;
+  filter: saturate(0.8) contrast(0.86) brightness(1.08);
+}
 
-  .quiet-hero__image--night {
-    display: none;
-  }
+html.light .quiet-hero__image--night {
+  display: none;
+}
 
-  .quiet-hero__image--day {
-    display: block;
-  }
+html.light .quiet-hero__image--day {
+  display: block;
+}
 
-  .hero-figure--dark {
-    display: none;
-  }
+html.light .hero-figure--dark {
+  display: none;
+}
 
-  .hero-figure--light {
-    display: block;
-  }
+html.light .hero-figure--light {
+  display: block;
+}
 
-  .quiet-hero__window {
-    background:
-      linear-gradient(90deg, transparent 48%, rgba(216, 177, 94, 0.12) 49%, rgba(216, 177, 94, 0.12) 51%, transparent 52%),
-      linear-gradient(180deg, transparent 31%, rgba(216, 177, 94, 0.1) 32%, rgba(216, 177, 94, 0.1) 34%, transparent 35%),
-      linear-gradient(112deg, rgba(255, 218, 142, 0.46), transparent 64%);
-    opacity: 0.7;
-  }
+html.light .quiet-hero__window {
+  background:
+    linear-gradient(90deg, transparent 48%, rgba(216, 177, 94, 0.12) 49%, rgba(216, 177, 94, 0.12) 51%, transparent 52%),
+    linear-gradient(180deg, transparent 31%, rgba(216, 177, 94, 0.1) 32%, rgba(216, 177, 94, 0.1) 34%, transparent 35%),
+    linear-gradient(112deg, rgba(255, 218, 142, 0.46), transparent 64%);
+  opacity: 0.7;
+}
 
-  .quiet-hero__grain {
-    opacity: 0.16;
-    mix-blend-mode: multiply;
-    background-image:
-      linear-gradient(rgba(42, 41, 38, 0.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(42, 41, 38, 0.025) 1px, transparent 1px);
-  }
+html.light .quiet-hero__grain {
+  opacity: 0.16;
+  mix-blend-mode: multiply;
+  background-image:
+    linear-gradient(rgba(42, 41, 38, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(42, 41, 38, 0.025) 1px, transparent 1px);
+}
 
-  .quiet-hero__kicker,
-  .quiet-hero__summary,
-  .quiet-hero__recent-label,
-  .quiet-hero__entry-meta,
-  .quiet-hero__entry-excerpt {
-    color: rgba(42, 41, 38, 0.62);
-  }
+html.light .quiet-hero__kicker,
+html.light .quiet-hero__summary,
+html.light .quiet-hero__recent-label,
+html.light .quiet-hero__entry-meta,
+html.light .quiet-hero__entry-excerpt {
+  color: rgba(42, 41, 38, 0.62);
+}
 
-  .quiet-hero__entry,
-  .quiet-hero__entry:last-child {
-    border-color: rgba(42, 41, 38, 0.14);
-  }
+html.light .quiet-hero__entry,
+html.light .quiet-hero__entry:last-child {
+  border-color: rgba(42, 41, 38, 0.14);
+}
 
-  .quiet-hero__entry:hover .quiet-hero__entry-title {
-    color: #000000;
-  }
+html.light .quiet-hero__entry:hover .quiet-hero__entry-title {
+  color: #000000;
 }
 
 @media (max-width: 860px) {
@@ -492,8 +496,19 @@
   font-family: var(--font-mono);
   font-size: 13px;
   line-height: 1.4;
-  color: var(--color-inverse-text);
+  color: inherit;
   letter-spacing: 0.08em;
+}
+
+html.light .ticker-line {
+  color: var(--day-text);
+}
+
+@media (max-width: 640px) {
+  .footer-links {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
 }
 
 /* ============================
@@ -606,4 +621,58 @@
   font-family: var(--font-serif);
   font-size: clamp(2.5rem, 8vw, 5rem);
   font-weight: 400;
+}
+
+/* ============================
+   Theme-aware content surfaces
+   ============================ */
+
+html.light .content-shell {
+  background: var(--day-bg);
+  color: var(--day-text);
+}
+
+html.light .content-kicker {
+  color: rgba(42, 41, 38, 0.55);
+}
+
+html.light .entry-card {
+  border-top-color: rgba(42, 41, 38, 0.14);
+}
+
+html.light .entry-card p,
+html.light .entry-meta {
+  color: rgba(42, 41, 38, 0.64);
+}
+
+html.light .markdown-body blockquote {
+  border-left-color: rgba(42, 41, 38, 0.22);
+  color: rgba(42, 41, 38, 0.72);
+}
+
+/* ============================
+   Gallery responsive grid
+   ============================ */
+
+@media (max-width: 768px) {
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .lightbox-content {
+    flex-direction: column !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .gallery-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ============================
+   Theme toggle button
+   ============================ */
+
+.theme-toggle:hover {
+  border-color: var(--color-amber) !important;
 }

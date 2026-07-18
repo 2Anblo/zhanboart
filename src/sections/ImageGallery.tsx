@@ -4,12 +4,15 @@ import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { galleryConfig } from '../config';
+import { useTheme } from '@/components/ThemeProvider';
 
 gsap.registerPlugin(ScrollTrigger);
 
 export default function ImageGallery() {
   const sectionRef = useRef<HTMLElement>(null);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -57,14 +60,19 @@ export default function ImageGallery() {
 
   const selected = selectedIndex !== null ? galleryConfig.items[selectedIndex] : null;
 
+  const bgColor = isLight ? 'var(--day-surface)' : '#0a0a0b';
+  const titleColor = isLight ? 'var(--day-text)' : '#ffffff';
+  const captionColor = isLight ? 'var(--day-muted)' : '#999';
+
   return (
     <>
       <section
         id="waves-gallery"
         ref={sectionRef}
         style={{
-          background: '#0a0a0b',
+          background: bgColor,
           padding: '12rem var(--page-padding)',
+          transition: 'background-color 0.5s ease',
         }}
       >
         <div className="text-center" style={{ marginBottom: '4rem' }}>
@@ -78,9 +86,10 @@ export default function ImageGallery() {
               style={{
                 fontFamily: 'var(--font-serif)',
                 fontSize: 'clamp(2.5rem, 6vw, 5rem)',
-                color: '#ffffff',
+                color: titleColor,
                 lineHeight: 0.95,
                 letterSpacing: '-0.03em',
+                transition: 'color 0.5s ease',
               }}
             >
               {galleryConfig.sectionTitle}
@@ -89,13 +98,12 @@ export default function ImageGallery() {
         </div>
 
         <div
-          className="mx-auto"
+          className="mx-auto gallery-grid"
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '2vw',
-            width: '85vw',
-            maxWidth: '1400px',
+            gap: 'clamp(0.75rem, 2vw, 2rem)',
+            width: 'min(85vw, 1400px)',
           }}
         >
           {galleryConfig.items.map((item, i) => (
@@ -133,9 +141,10 @@ export default function ImageGallery() {
                 style={{
                   fontFamily: 'var(--font-sans)',
                   fontSize: '12px',
-                  color: '#999',
+                  color: captionColor,
                   marginTop: '0.75rem',
                   letterSpacing: '0.02em',
+                  transition: 'color 0.5s ease',
                 }}
               >
                 {item.caption}
@@ -152,7 +161,7 @@ export default function ImageGallery() {
             position: 'fixed',
             inset: 0,
             zIndex: 9999,
-            background: 'rgba(10, 10, 11, 0.95)',
+            background: isLight ? 'rgba(251, 247, 236, 0.94)' : 'rgba(10, 10, 11, 0.95)',
             backdropFilter: 'blur(8px)',
             display: 'flex',
             alignItems: 'center',
@@ -172,33 +181,35 @@ export default function ImageGallery() {
               maxHeight: '80vh',
               alignItems: 'center',
               cursor: 'default',
+              flexDirection: 'column',
             }}
+            className="lightbox-content"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Image — left */}
-            <div style={{ flex: '0 0 55%', maxHeight: '80vh' }}>
+            <div style={{ flex: '0 0 auto', maxHeight: '60vh' }}>
               <img
                 src={selected.src}
                 alt={selected.caption}
                 style={{
                   width: '100%',
-                  maxHeight: '80vh',
+                  maxHeight: '60vh',
                   objectFit: 'contain',
                   display: 'block',
                 }}
               />
             </div>
 
-            {/* Description — right */}
-            <div style={{ flex: '1 1 45%', overflow: 'auto', maxHeight: '80vh' }}>
+            {/* Description — below */}
+            <div style={{ flex: '1 1 auto', overflow: 'auto', maxWidth: '600px', textAlign: 'center' }}>
               <h3
                 style={{
                   fontFamily: 'var(--font-serif)',
                   fontSize: 'clamp(1.5rem, 3vw, 2.5rem)',
-                  color: '#ffffff',
+                  color: titleColor,
                   lineHeight: 1.15,
                   letterSpacing: '-0.02em',
-                  marginBottom: '1.5rem',
+                  marginBottom: '1rem',
                 }}
               >
                 {selected.caption}
@@ -209,7 +220,7 @@ export default function ImageGallery() {
                   fontSize: '15px',
                   fontWeight: 300,
                   lineHeight: 1.85,
-                  color: '#b0b2b5',
+                  color: captionColor,
                 }}
               >
                 {selected.description}
@@ -222,7 +233,7 @@ export default function ImageGallery() {
                     marginTop: '2rem',
                     fontFamily: 'var(--font-sans)',
                     fontSize: '11px',
-                    color: '#666',
+                    color: isLight ? 'var(--day-muted)' : '#666',
                     letterSpacing: '0.1em',
                     textTransform: 'uppercase',
                   }}
@@ -231,28 +242,28 @@ export default function ImageGallery() {
                 </div>
               )}
             </div>
-
-            {/* Close button */}
-            <button
-              onClick={() => setSelectedIndex(null)}
-              style={{
-                position: 'absolute',
-                top: '3vh',
-                right: '3vw',
-                background: 'none',
-                border: 'none',
-                color: '#999',
-                fontSize: '2rem',
-                cursor: 'pointer',
-                lineHeight: 1,
-                transition: 'color 0.2s',
-              }}
-              onMouseEnter={(e) => { (e.target as HTMLElement).style.color = '#fff'; }}
-              onMouseLeave={(e) => { (e.target as HTMLElement).style.color = '#999'; }}
-            >
-              &times;
-            </button>
           </div>
+
+          {/* Close button */}
+          <button
+            onClick={() => setSelectedIndex(null)}
+            style={{
+              position: 'absolute',
+              top: '3vh',
+              right: '3vw',
+              background: 'none',
+              border: 'none',
+              color: isLight ? 'var(--day-muted)' : '#999',
+              fontSize: '2rem',
+              cursor: 'pointer',
+              lineHeight: 1,
+              transition: 'color 0.2s',
+            }}
+            onMouseEnter={(e) => { (e.target as HTMLElement).style.color = isLight ? 'var(--day-text)' : '#fff'; }}
+            onMouseLeave={(e) => { (e.target as HTMLElement).style.color = isLight ? 'var(--day-muted)' : '#999'; }}
+          >
+            &times;
+          </button>
         </div>
       )}
 
