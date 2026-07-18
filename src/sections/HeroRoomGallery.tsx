@@ -15,9 +15,6 @@ export default function HeroRoomGallery({ entries }: { entries: HeroEntry[] }) {
   return (
     <section id="hero" className="quiet-hero" aria-label="zhanbo.art private archive">
       <div className="quiet-hero__scene" aria-hidden="true">
-        <div className="quiet-hero__image quiet-hero__image--night" />
-        <div className="quiet-hero__image quiet-hero__image--day" />
-        <div className="quiet-hero__window" />
         <img
           src="/images/dark-mode.png"
           alt=""
@@ -30,7 +27,6 @@ export default function HeroRoomGallery({ entries }: { entries: HeroEntry[] }) {
           className="hero-figure hero-figure--light"
           loading="eager"
         />
-        <div className="quiet-hero__grain" />
       </div>
 
       <div className="quiet-hero__inner">

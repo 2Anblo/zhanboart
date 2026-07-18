@@ -96,68 +96,8 @@
 .quiet-hero__scene {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  z-index: 0;
   overflow: hidden;
-}
-
-.quiet-hero__scene::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(90deg, rgba(0, 0, 0, 0.48), transparent 36%, rgba(0, 0, 0, 0.34)),
-    radial-gradient(circle at 70% 18%, rgba(74, 38, 51, 0.26), transparent 30rem),
-    radial-gradient(circle at 50% 110%, rgba(0, 0, 0, 0.7), transparent 36rem);
-}
-
-.quiet-hero__image {
-  position: absolute;
-  inset: auto 8vw 10vh auto;
-  width: min(42rem, 50vw);
-  aspect-ratio: 4 / 3;
-  background-position: center;
-  background-size: cover;
-  border: 1px solid rgba(230, 225, 216, 0.12);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.36);
-  opacity: 0.2;
-  transform: rotate(-1deg);
-  filter: saturate(0.72) contrast(0.92);
-}
-
-.quiet-hero__image--night {
-  background-image: url("/images/rooms/room1-back.jpg");
-}
-
-.quiet-hero__image--day {
-  display: none;
-  background-image: url("/images/rooms/room4-back.jpg");
-}
-
-.quiet-hero__window {
-  position: absolute;
-  top: 8vh;
-  left: 10vw;
-  width: min(22rem, 36vw);
-  height: 58vh;
-  background:
-    linear-gradient(90deg, transparent 48%, rgba(230, 225, 216, 0.12) 49%, rgba(230, 225, 216, 0.12) 51%, transparent 52%),
-    linear-gradient(180deg, transparent 31%, rgba(230, 225, 216, 0.08) 32%, rgba(230, 225, 216, 0.08) 34%, transparent 35%),
-    linear-gradient(115deg, rgba(177, 188, 216, 0.16), transparent 65%);
-  opacity: 0.56;
-  filter: blur(0.3px);
-  animation: quietLightDrift 12s ease-in-out infinite alternate;
-}
-
-.quiet-hero__grain {
-  position: absolute;
-  inset: 0;
-  opacity: 0.18;
-  mix-blend-mode: soft-light;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
-  background-size: 3px 3px;
-  mask-image: radial-gradient(circle at center, black, transparent 82%);
 }
 
 /* Hero Figure — boy illustration */
@@ -167,6 +107,7 @@
   bottom: 0;
   height: 85vh;
   width: auto;
+  aspect-ratio: 547 / 607;
   max-width: 48vw;
   z-index: 1;
   pointer-events: none;
@@ -178,14 +119,12 @@
 .hero-figure--dark {
   mix-blend-mode: screen;
   opacity: 0.9;
-  filter: brightness(1.1) contrast(0.95);
 }
 
 .hero-figure--light {
   display: none;
   mix-blend-mode: multiply;
   opacity: 0.85;
-  filter: brightness(0.9) contrast(1.1);
 }
 
 @keyframes figureFloat {
@@ -302,15 +241,6 @@
   color: #ffffff;
 }
 
-@keyframes quietLightDrift {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(1.2rem, -0.8rem, 0);
-  }
-}
-
 html.light .quiet-hero {
   background:
     radial-gradient(circle at 18% 16%, rgba(255, 218, 142, 0.34), transparent 26rem),
@@ -322,28 +252,6 @@ html.light .quiet-hero::after {
   background: linear-gradient(90deg, transparent, rgba(42, 41, 38, 0.18), transparent);
 }
 
-html.light .quiet-hero__scene::before {
-  background:
-    linear-gradient(110deg, rgba(255, 255, 255, 0.2), transparent 46%),
-    radial-gradient(circle at 72% 20%, rgba(184, 215, 232, 0.34), transparent 32rem),
-    radial-gradient(circle at 52% 116%, rgba(216, 177, 94, 0.2), transparent 34rem);
-}
-
-html.light .quiet-hero__image {
-  border-color: rgba(42, 41, 38, 0.08);
-  box-shadow: 0 28px 80px rgba(125, 117, 104, 0.18);
-  opacity: 0.24;
-  filter: saturate(0.8) contrast(0.86) brightness(1.08);
-}
-
-html.light .quiet-hero__image--night {
-  display: none;
-}
-
-html.light .quiet-hero__image--day {
-  display: block;
-}
-
 html.light .hero-figure--dark {
   display: none;
 }
@@ -352,20 +260,8 @@ html.light .hero-figure--light {
   display: block;
 }
 
-html.light .quiet-hero__window {
-  background:
-    linear-gradient(90deg, transparent 48%, rgba(216, 177, 94, 0.12) 49%, rgba(216, 177, 94, 0.12) 51%, transparent 52%),
-    linear-gradient(180deg, transparent 31%, rgba(216, 177, 94, 0.1) 32%, rgba(216, 177, 94, 0.1) 34%, transparent 35%),
-    linear-gradient(112deg, rgba(255, 218, 142, 0.46), transparent 64%);
-  opacity: 0.7;
-}
-
-html.light .quiet-hero__grain {
-  opacity: 0.16;
-  mix-blend-mode: multiply;
-  background-image:
-    linear-gradient(rgba(42, 41, 38, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(42, 41, 38, 0.025) 1px, transparent 1px);
+html.light .hero-figure {
+  aspect-ratio: 549 / 573;
 }
 
 html.light .quiet-hero__kicker,
@@ -386,19 +282,6 @@ html.light .quiet-hero__entry:hover .quiet-hero__entry-title {
 }
 
 @media (max-width: 860px) {
-  .quiet-hero__image {
-    inset: 14vh -18vw auto auto;
-    width: 82vw;
-    opacity: 0.14;
-  }
-
-  .quiet-hero__window {
-    left: -8vw;
-    width: 54vw;
-    height: 50vh;
-    opacity: 0.38;
-  }
-
   .hero-figure {
     right: -4vw;
     bottom: 0;
@@ -441,9 +324,6 @@ html.light .quiet-hero__entry:hover .quiet-hero__entry-title {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .quiet-hero__window {
-    animation: none;
-  }
   .hero-figure {
     animation: none;
   }
