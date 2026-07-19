@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 
-export type ContentType = "journal" | "notes" | "photos";
+export type ContentType = "journal" | "notes" | "photos" | "music";
 export type Visibility = "public" | "unlisted" | "draft";
 
 export interface ContentEntry {
@@ -16,12 +16,15 @@ export interface ContentEntry {
   location?: string;
   image?: string;
   caption?: string;
+  audio?: string;
+  albumArt?: string;
+  artist?: string;
   visibility: Visibility;
   content: string;
 }
 
 const contentRoot = path.join(process.cwd(), "content");
-const contentTypes: ContentType[] = ["journal", "notes", "photos"];
+const contentTypes: ContentType[] = ["journal", "notes", "photos", "music"];
 
 function normalizeTags(value: unknown): string[] {
   if (Array.isArray(value)) return value.map(String);
@@ -53,6 +56,9 @@ function readType(type: ContentType): ContentEntry[] {
         location: data.location ? String(data.location) : undefined,
         image: data.image ? String(data.image) : undefined,
         caption: data.caption ? String(data.caption) : undefined,
+        audio: data.audio ? String(data.audio) : undefined,
+        albumArt: data.albumArt ? String(data.albumArt) : undefined,
+        artist: data.artist ? String(data.artist) : undefined,
         visibility: (data.visibility || "public") as Visibility,
         content,
       } satisfies ContentEntry;
