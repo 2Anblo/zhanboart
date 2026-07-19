@@ -160,13 +160,17 @@ git rev-parse --show-toplevel
 # 2. 查看修改
 git status
 
-# 3. 添加修改
+# 3. 运行 lint 和 build 验证（必须通过后才能提交）
+npm run lint
+npm run build
+
+# 4. 添加修改
 git add .
 
-# 4. 提交（使用清晰的提交信息，描述本次修改内容）
+# 5. 提交（使用清晰的提交信息，描述本次修改内容）
 git commit -m "<descriptive message>"
 
-# 5. 推送
+# 6. 推送
 git push
 ```
 
@@ -180,6 +184,7 @@ git push
 - 禁止在非根目录执行 git 命令
 - 禁止积累多次修改后一次性提交
 - 禁止只 commit 不 push（除非用户明确要求不推送）
+- **禁止在 `npm run lint` 或 `npm run build` 报错时提交并 push 代码**
 
 ## 开发命令
 
