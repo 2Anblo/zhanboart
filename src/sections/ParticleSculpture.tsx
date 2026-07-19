@@ -114,6 +114,7 @@ export default function ParticleSculpture() {
   const { theme } = useTheme();
   const isLight = theme === 'light';
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const container = canvasContainerRef.current;
     if (!container) return;

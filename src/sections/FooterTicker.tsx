@@ -31,6 +31,8 @@ export default function FooterTicker() {
   const startLineCycleRef = useRef<((state: LineState, delay: number) => void) | null>(null);
   const { theme } = useTheme();
   const isLight = theme === 'light';
+  const isLightRef = useRef(isLight);
+  isLightRef.current = isLight;
 
   const DICTIONARY = footerConfig.tickerWords;
 
@@ -44,7 +46,7 @@ export default function FooterTicker() {
       const progressA = rateA.value * chars;
       const progressB = rateB.value * chars;
 
-      const invisibleColor = isLight ? '#fbf7ec' : '#0a0a0b';
+      const invisibleColor = isLightRef.current ? '#fbf7ec' : '#0a0a0b';
       if (i < progressB) {
         // Behind rateB: invisible
         html += `<span style="color:${invisibleColor}">_</span>`;

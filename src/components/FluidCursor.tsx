@@ -215,6 +215,7 @@ export default function FluidCursor() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
+      className="fluid-cursor"
       style={{
         position: "fixed",
         inset: 0,

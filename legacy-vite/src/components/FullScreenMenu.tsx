@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { navigationConfig } from '../config';
 
@@ -13,6 +13,15 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
   const linksRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const hasOpenedRef = useRef(false);
+
+  // Ensure overlay is hidden before first paint to prevent click interception
+  useLayoutEffect(() => {
+    const overlay = overlayRef.current;
+    if (overlay && !hasOpenedRef.current && !isOpen) {
+      overlay.style.display = 'none';
+      overlay.style.pointerEvents = 'none';
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     const overlay = overlayRef.current;
@@ -29,6 +38,7 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
       paused: true,
       onReverseComplete: () => {
         overlay.style.display = 'none';
+        overlay.style.pointerEvents = 'none';
       },
     });
 
@@ -45,11 +55,14 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
     if (isOpen) {
       hasOpenedRef.current = true;
       overlay.style.display = 'flex';
+      overlay.style.pointerEvents = 'auto';
       tl.play();
     } else if (hasOpenedRef.current) {
+      overlay.style.pointerEvents = 'none';
       tl.reverse();
     } else {
       overlay.style.display = 'none';
+      overlay.style.pointerEvents = 'none';
     }
 
     return () => {

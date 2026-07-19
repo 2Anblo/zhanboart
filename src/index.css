@@ -559,3 +559,11 @@ html.light .markdown-body blockquote {
 .theme-toggle:hover {
   border-color: var(--color-amber) !important;
 }
+
+/* ============================
+   Fluid Cursor — must not intercept clicks
+   ============================ */
+
+.fluid-cursor {
+  pointer-events: none !important;
+}

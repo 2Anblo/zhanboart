@@ -18,13 +18,28 @@ export function useTheme() {
   return ctx;
 }
 
+function applyTheme(t: Theme) {
+  const root = document.documentElement;
+  if (t === "light") {
+    root.classList.add("light");
+    root.classList.remove("dark");
+  } else {
+    root.classList.add("dark");
+    root.classList.remove("light");
+  }
+}
+
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
 
-  // On mount, read from localStorage or system preference
+  // On mount, read from localStorage or system preference.
+  // This must run in an effect to avoid SSR/hydration mismatch:
+  // the server always renders "dark", and the client corrects
+  // after hydration using the saved preference.
   useEffect(() => {
     const saved = localStorage.getItem("theme") as Theme | null;
     if (saved === "dark" || saved === "light") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setThemeState(saved);
       applyTheme(saved);
     } else {
@@ -35,22 +50,11 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
     }
   }, []);
 
-  const applyTheme = useCallback((t: Theme) => {
-    const root = document.documentElement;
-    if (t === "light") {
-      root.classList.add("light");
-      root.classList.remove("dark");
-    } else {
-      root.classList.add("dark");
-      root.classList.remove("light");
-    }
-  }, []);
-
   const setTheme = useCallback((t: Theme) => {
     setThemeState(t);
     applyTheme(t);
     localStorage.setItem("theme", t);
-  }, [applyTheme]);
+  }, []);
 
   const toggleTheme = useCallback(() => {
     setTheme(theme === "dark" ? "light" : "dark");
