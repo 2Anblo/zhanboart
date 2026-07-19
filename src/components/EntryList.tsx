@@ -5,6 +5,7 @@ const labels: Record<ContentType, string> = {
   journal: "Journal",
   notes: "Notes",
   photos: "Photos",
+  music: "Music",
 };
 
 export function EntryList({ entries }: { entries: ContentEntry[] }) {

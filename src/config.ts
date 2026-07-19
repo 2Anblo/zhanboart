@@ -31,6 +31,7 @@ export const navigationConfig: NavigationConfig = {
     { label: "日志", target: "consciousness" },
     { label: "笔记", target: "lighthouse" },
     { label: "照片", target: "waves-gallery" },
+    { label: "音乐", target: "music" },
     { label: "此刻", target: "waves-video" },
     { label: "关于", target: "footer" },
   ],
@@ -236,6 +237,25 @@ export const galleryConfig: GalleryConfig = {
   lightboxCloseHint: "按 Esc 或点击外部关闭",
 }
 
+// --- Music Section ---
+
+export interface MusicSectionConfig {
+  sectionLabel: string
+  title: string
+  paragraphs: string[]
+  ctaText: string
+}
+
+export const musicSectionConfig: MusicSectionConfig = {
+  sectionLabel: "05 / 音乐",
+  title: "声音和文字之间的空隙",
+  paragraphs: [
+    "有些歌适合在深夜单独听。不是作为背景音，而是作为房间里另一个沉默的参与者。",
+    "这里的音乐文字不是乐评，也不是推荐清单。它们更像是在某首歌里迷路时留下的记号——关于一段旋律如何与某个时刻重叠，关于声音如何比语言更早抵达记忆。",
+  ],
+  ctaText: "查看全部音乐",
+}
+
 // --- Footer ---
 
 export interface FooterLinkColumn {
@@ -253,7 +273,7 @@ export const footerConfig: FooterConfig = {
   linkColumns: [
     {
       heading: "内容",
-      links: ["日志", "笔记", "照片", "归档"],
+      links: ["日志", "笔记", "照片", "音乐", "归档"],
     },
     {
       heading: "关于",

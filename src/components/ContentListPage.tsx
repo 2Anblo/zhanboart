@@ -7,6 +7,7 @@ const pageConfig: Record<ContentType, { title: string; kicker: string }> = {
   journal: { title: "Journal", kicker: "Longer records" },
   notes: { title: "Notes", kicker: "Fragments" },
   photos: { title: "Photos", kicker: "Light archive" },
+  music: { title: "Music", kicker: "Sound and words" },
 };
 
 export default function ContentListPage({ type }: { type: ContentType }) {

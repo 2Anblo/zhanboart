@@ -16,6 +16,7 @@ export default function ContentNav() {
         <Link href="/journal" className="no-underline" style={{ color: "inherit" }}>Journal</Link>
         <Link href="/notes" className="no-underline" style={{ color: "inherit" }}>Notes</Link>
         <Link href="/photos" className="no-underline" style={{ color: "inherit" }}>Photos</Link>
+        <Link href="/music" className="no-underline" style={{ color: "inherit" }}>Music</Link>
         <Link href="/archive" className="no-underline" style={{ color: "inherit" }}>Archive</Link>
         <div className="ml-2">
           <ThemeToggle />
