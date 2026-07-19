@@ -1,5 +1,5 @@
 import HomeExperience from "@/components/HomeExperience";
-import { getRecentPublicEntries } from "@/lib/content";
+import { getRecentPublicEntries, getPublicEntries } from "@/lib/content";
 
 export default function HomePage() {
   const recentEntries = getRecentPublicEntries(3).map((entry) => ({
@@ -16,5 +16,7 @@ export default function HomePage() {
     visibility: entry.visibility,
   }));
 
-  return <HomeExperience recentEntries={recentEntries} />;
+  const musicEntries = getPublicEntries("music").slice(0, 3);
+
+  return <HomeExperience recentEntries={recentEntries} musicEntries={musicEntries} />;
 }

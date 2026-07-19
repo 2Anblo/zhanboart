@@ -7,6 +7,7 @@ import FullScreenMenu from "@/components/FullScreenMenu";
 import HeroRoomGallery from "@/sections/HeroRoomGallery";
 import ParticleSculpture from "@/sections/ParticleSculpture";
 import LighthouseVideo from "@/sections/LighthouseVideo";
+import MusicSection from "@/sections/MusicSection";
 import ImageGallery from "@/sections/ImageGallery";
 import WavesVideo from "@/sections/WavesVideo";
 import FooterTicker from "@/sections/FooterTicker";
@@ -14,7 +15,13 @@ import type { ContentEntry } from "@/lib/content";
 
 type HomeEntry = Omit<ContentEntry, "content">;
 
-export default function HomeExperience({ recentEntries }: { recentEntries: HomeEntry[] }) {
+export default function HomeExperience({
+  recentEntries,
+  musicEntries,
+}: {
+  recentEntries: HomeEntry[];
+  musicEntries: ContentEntry[];
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const lenisRef = useLenis();
 
@@ -41,6 +48,7 @@ export default function HomeExperience({ recentEntries }: { recentEntries: HomeE
         <HeroRoomGallery entries={recentEntries} />
         <ParticleSculpture />
         <LighthouseVideo />
+        <MusicSection entries={musicEntries} />
         <ImageGallery />
         <WavesVideo />
       </main>
