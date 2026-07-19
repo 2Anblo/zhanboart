@@ -17,6 +17,7 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
   const overlayRef = useRef<HTMLDivElement>(null);
   const linksRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const hasOpenedRef = useRef(false);
 
   useEffect(() => {
     const overlay = overlayRef.current;
@@ -29,9 +30,13 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
       tlRef.current.kill();
     }
 
-    const tl = gsap.timeline({ paused: true });
+    const tl = gsap.timeline({
+      paused: true,
+      onReverseComplete: () => {
+        overlay.style.display = 'none';
+      },
+    });
 
-    tl.set(overlay, { display: 'flex' });
     tl.fromTo(overlay, { opacity: 0 }, { opacity: 1, duration: 0.4, ease: 'power2.out' });
     tl.fromTo(
       linkEls,
@@ -43,9 +48,13 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
     tlRef.current = tl;
 
     if (isOpen) {
+      hasOpenedRef.current = true;
+      overlay.style.display = 'flex';
       tl.play();
-    } else {
+    } else if (hasOpenedRef.current) {
       tl.reverse();
+    } else {
+      overlay.style.display = 'none';
     }
 
     return () => {
@@ -68,7 +77,7 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-[200] hidden"
+      className="fixed inset-0 z-[200]"
       style={{ background: bgColor, transition: 'background-color 0.3s ease' }}
     >
       {navigationConfig.closeLabel && (
