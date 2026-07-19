@@ -32,7 +32,10 @@ export default function FooterTicker() {
   const { theme } = useTheme();
   const isLight = theme === 'light';
   const isLightRef = useRef(isLight);
-  isLightRef.current = isLight;
+
+  useEffect(() => {
+    isLightRef.current = isLight;
+  }, [isLight]);
 
   const DICTIONARY = footerConfig.tickerWords;
 

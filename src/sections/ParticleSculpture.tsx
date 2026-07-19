@@ -113,15 +113,19 @@ export default function ParticleSculpture() {
   const textRef = useRef<HTMLDivElement>(null);
   const { theme } = useTheme();
   const isLight = theme === 'light';
+  const isLightRef = useRef(isLight);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    isLightRef.current = isLight;
+  }, [isLight]);
+
   useEffect(() => {
     const container = canvasContainerRef.current;
     if (!container) return;
 
     // Three.js setup
     const scene = new THREE.Scene();
-    const fogColor = isLight ? 0xf5f4f0 : 0x090a0d;
+    const fogColor = isLightRef.current ? 0xf5f4f0 : 0x090a0d;
     scene.fog = new THREE.FogExp2(fogColor, 0.035);
 
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
@@ -147,7 +151,7 @@ export default function ParticleSculpture() {
         uTime: { value: 0 },
       },
       vertexShader,
-      fragmentShader: isLight ? fragmentShaderLight : fragmentShaderDark,
+      fragmentShader: isLightRef.current ? fragmentShaderLight : fragmentShaderDark,
     });
 
     const mesh = new THREE.Points(geometry, material);
@@ -161,10 +165,10 @@ export default function ParticleSculpture() {
     }
     dustGeometry.setAttribute('position', new THREE.BufferAttribute(dustPositions, 3));
     const dustMaterial = new THREE.PointsMaterial({
-      color: isLight ? 0x999999 : 0x888888,
+      color: isLightRef.current ? 0x999999 : 0x888888,
       size: 0.03,
       transparent: true,
-      opacity: isLight ? 0.3 : 0.25,
+      opacity: isLightRef.current ? 0.3 : 0.25,
     });
     const dust = new THREE.Points(dustGeometry, dustMaterial);
     scene.add(dust);
