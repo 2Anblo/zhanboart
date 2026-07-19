@@ -9,6 +9,7 @@ const typeLabels: Record<ContentType, string> = {
   journal: "Journal",
   notes: "Notes",
   photos: "Photos",
+  music: "Music",
 };
 
 export default function HeroRoomGallery({ entries }: { entries: HeroEntry[] }) {
