@@ -11,6 +11,7 @@ import MusicSection from "@/sections/MusicSection";
 import ImageGallery from "@/sections/ImageGallery";
 import WavesVideo from "@/sections/WavesVideo";
 import FooterTicker from "@/sections/FooterTicker";
+import OpeningAnimation from "@/components/OpeningAnimation";
 import type { ContentEntry } from "@/lib/content";
 
 type HomeEntry = Omit<ContentEntry, "content">;
@@ -23,10 +24,12 @@ export default function HomeExperience({
   musicEntries: ContentEntry[];
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [openingDone, setOpeningDone] = useState(false);
   const lenisRef = useLenis();
 
   const handleMenuOpen = useCallback(() => setMenuOpen(true), []);
   const handleMenuClose = useCallback(() => setMenuOpen(false), []);
+  const handleOpeningComplete = useCallback(() => setOpeningDone(true), []);
 
   const handleNavigate = useCallback(
     (sectionId: string) => {
@@ -42,17 +45,27 @@ export default function HomeExperience({
 
   return (
     <div className="relative">
-      <Navigation onMenuOpen={handleMenuOpen} />
-      <FullScreenMenu isOpen={menuOpen} onClose={handleMenuClose} onNavigate={handleNavigate} />
-      <main>
-        <HeroRoomGallery entries={recentEntries} />
-        <ParticleSculpture />
-        <LighthouseVideo />
-        <MusicSection entries={musicEntries} />
-        <ImageGallery />
-        <WavesVideo />
-      </main>
-      <FooterTicker />
+      <OpeningAnimation onComplete={handleOpeningComplete} />
+      <div
+        style={{
+          opacity: openingDone ? 1 : 0.92,
+          transform: openingDone ? "scale(1)" : "scale(1.005)",
+          transition: "opacity 0.9s ease, transform 0.9s ease",
+          transformOrigin: "center top",
+        }}
+      >
+        <Navigation onMenuOpen={handleMenuOpen} />
+        <FullScreenMenu isOpen={menuOpen} onClose={handleMenuClose} onNavigate={handleNavigate} />
+        <main>
+          <HeroRoomGallery entries={recentEntries} />
+          <ParticleSculpture />
+          <LighthouseVideo />
+          <MusicSection entries={musicEntries} />
+          <ImageGallery />
+          <WavesVideo />
+        </main>
+        <FooterTicker />
+      </div>
     </div>
   );
 }
