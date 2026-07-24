@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import Navigation from "@/components/Navigation";
-import FullScreenMenu from "@/components/FullScreenMenu";
 import HeroRoomGallery from "@/sections/HeroRoomGallery";
 import ParticleSculpture from "@/sections/ParticleSculpture";
 import LighthouseVideo from "@/sections/LighthouseVideo";
@@ -23,30 +22,14 @@ export default function HomeExperience({
   recentEntries: HomeEntry[];
   musicEntries: ContentEntry[];
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [openingDone, setOpeningDone] = useState(false);
-  const lenisRef = useLenis();
+  useLenis();
 
-  const handleMenuOpen = useCallback(() => setMenuOpen(true), []);
-  const handleMenuClose = useCallback(() => setMenuOpen(false), []);
   const handleOpeningComplete = useCallback(() => setOpeningDone(true), []);
-
-  const handleNavigate = useCallback(
-    (sectionId: string) => {
-      const el = document.getElementById(sectionId);
-      if (el && lenisRef.current) {
-        lenisRef.current.scrollTo(el, { offset: 0 });
-      } else if (el) {
-        el.scrollIntoView({ behavior: "smooth" });
-      }
-    },
-    [lenisRef]
-  );
 
   return (
     <div className="relative">
       <OpeningAnimation onComplete={handleOpeningComplete} />
-      <FullScreenMenu isOpen={menuOpen} onClose={handleMenuClose} onNavigate={handleNavigate} />
       <div
         style={{
           opacity: openingDone ? 1 : 0.92,
@@ -55,7 +38,7 @@ export default function HomeExperience({
           transformOrigin: "center top",
         }}
       >
-        <Navigation onMenuOpen={handleMenuOpen} />
+        <Navigation />
         <main>
           <HeroRoomGallery entries={recentEntries} />
           <ParticleSculpture />

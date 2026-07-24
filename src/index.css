@@ -504,6 +504,92 @@ html.light .ticker-line {
   object-fit: cover;
 }
 
+.menu-page {
+  min-height: 100svh;
+  background: var(--color-void);
+  color: var(--color-inverse-text);
+  padding: 7rem var(--page-padding) 4rem;
+}
+
+.menu-page__nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem var(--page-padding);
+}
+
+.menu-page__brand,
+.menu-page__close {
+  color: inherit;
+  text-decoration: none;
+}
+
+.menu-page__brand {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+}
+
+.menu-page__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.menu-page__close {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 8px 20px;
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.menu-page__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.9fr);
+  gap: clamp(3rem, 8vw, 6rem);
+  width: min(1200px, 100%);
+  margin: 0 auto;
+}
+
+.menu-page__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.menu-page__link {
+  width: fit-content;
+  color: inherit;
+  font-family: var(--font-serif);
+  font-size: clamp(2.6rem, 8vw, 5rem);
+  line-height: 0.98;
+  text-decoration: none;
+}
+
+.menu-page__link:hover,
+.menu-page__close:hover {
+  color: var(--color-amber);
+}
+
+.menu-page__side {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+  color: rgba(255, 255, 255, 0.58);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+}
+
 .archive-year {
   margin-top: 3rem;
   font-family: var(--font-serif);
@@ -542,11 +628,33 @@ html.light .markdown-body blockquote {
   color: rgba(42, 41, 38, 0.72);
 }
 
+html.light .menu-page {
+  background: var(--day-bg);
+  color: var(--day-text);
+}
+
+html.light .menu-page__close {
+  border-color: rgba(42, 41, 38, 0.25);
+}
+
+html.light .menu-page__side {
+  color: rgba(42, 41, 38, 0.6);
+}
+
 /* ============================
    Gallery responsive grid
    ============================ */
 
 @media (max-width: 768px) {
+  .menu-page__inner {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .menu-page__side {
+    align-self: start;
+  }
+
   .gallery-grid {
     grid-template-columns: repeat(2, 1fr) !important;
   }

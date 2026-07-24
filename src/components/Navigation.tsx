@@ -1,16 +1,13 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { gsap } from 'gsap';
 import { siteConfig, navigationConfig } from '../config';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useTheme } from '@/components/ThemeProvider';
 
-interface NavigationProps {
-  onMenuOpen: () => void;
-}
-
-export default function Navigation({ onMenuOpen }: NavigationProps) {
+export default function Navigation() {
   const navRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLAnchorElement>(null);
   const { theme } = useTheme();
@@ -88,9 +85,9 @@ export default function Navigation({ onMenuOpen }: NavigationProps) {
       <div className="flex items-center gap-3">
         <ThemeToggle />
         {navigationConfig.menuLabel && (
-          <button
-            onClick={onMenuOpen}
-            className="cursor-pointer bg-transparent"
+          <Link
+            href="/menu"
+            className="cursor-pointer bg-transparent no-underline"
             style={{
               fontFamily: 'var(--font-sans)',
               fontSize: '11px',
@@ -104,14 +101,14 @@ export default function Navigation({ onMenuOpen }: NavigationProps) {
               transition: 'border-color 0.3s ease, color 0.5s ease',
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = borderHover;
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = borderHover;
             }}
             onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = borderColor;
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = borderColor;
             }}
           >
             {navigationConfig.menuLabel}
-          </button>
+          </Link>
         )}
       </div>
     </nav>
