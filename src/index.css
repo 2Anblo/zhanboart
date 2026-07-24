@@ -641,10 +641,6 @@ html.light .menu-page__side {
   color: rgba(42, 41, 38, 0.6);
 }
 
-/* ============================
-   Gallery responsive grid
-   ============================ */
-
 @media (max-width: 768px) {
   .menu-page__inner {
     grid-template-columns: 1fr;
@@ -653,19 +649,6 @@ html.light .menu-page__side {
 
   .menu-page__side {
     align-self: start;
-  }
-
-  .gallery-grid {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-  .lightbox-content {
-    flex-direction: column !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .gallery-grid {
-    grid-template-columns: 1fr !important;
   }
 }
 

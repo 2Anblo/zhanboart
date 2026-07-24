@@ -7,8 +7,6 @@ import HeroRoomGallery from "@/sections/HeroRoomGallery";
 import ParticleSculpture from "@/sections/ParticleSculpture";
 import LighthouseVideo from "@/sections/LighthouseVideo";
 import MusicSection from "@/sections/MusicSection";
-import ImageGallery from "@/sections/ImageGallery";
-import WavesVideo from "@/sections/WavesVideo";
 import FooterTicker from "@/sections/FooterTicker";
 import OpeningAnimation from "@/components/OpeningAnimation";
 import type { ContentEntry } from "@/lib/content";
@@ -44,8 +42,6 @@ export default function HomeExperience({
           <ParticleSculpture />
           <LighthouseVideo />
           <MusicSection entries={musicEntries} />
-          <ImageGallery />
-          <WavesVideo />
         </main>
         <FooterTicker />
       </div>
