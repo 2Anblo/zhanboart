@@ -459,6 +459,11 @@ html.light .ticker-line {
   color: rgba(255, 255, 255, 0.64);
 }
 
+.content-empty {
+  margin-top: 2rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
 .markdown-body {
   width: min(760px, 100%);
   margin: 0 auto;
@@ -526,6 +531,10 @@ html.light .entry-card {
 html.light .entry-card p,
 html.light .entry-meta {
   color: rgba(42, 41, 38, 0.64);
+}
+
+html.light .content-empty {
+  color: rgba(42, 41, 38, 0.62);
 }
 
 html.light .markdown-body blockquote {

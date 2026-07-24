@@ -8,6 +8,7 @@ const pageConfig: Record<ContentType, { title: string; kicker: string }> = {
   notes: { title: "Notes", kicker: "Fragments" },
   photos: { title: "Photos", kicker: "Light archive" },
   music: { title: "Music", kicker: "Sound and words" },
+  thoughts: { title: "Thoughts", kicker: "Loose thoughts" },
 };
 
 export default function ContentListPage({ type }: { type: ContentType }) {
@@ -20,7 +21,7 @@ export default function ContentListPage({ type }: { type: ContentType }) {
       <div className="content-inner">
         <div className="content-kicker">{config.kicker}</div>
         <h1 className="content-title">{config.title}</h1>
-        <EntryList entries={entries} />
+        {entries.length > 0 ? <EntryList entries={entries} /> : <p className="content-empty">Nothing here yet.</p>}
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
 
-export type ContentType = "journal" | "notes" | "photos" | "music";
+export type ContentType = "journal" | "notes" | "photos" | "music" | "thoughts";
 export type Visibility = "public" | "unlisted" | "draft";
 
 export interface ContentEntry {
@@ -24,7 +24,7 @@ export interface ContentEntry {
 }
 
 const contentRoot = path.join(process.cwd(), "content");
-const contentTypes: ContentType[] = ["journal", "notes", "photos", "music"];
+const contentTypes: ContentType[] = ["journal", "notes", "photos", "music", "thoughts"];
 
 function normalizeTags(value: unknown): string[] {
   if (Array.isArray(value)) return value.map(String);

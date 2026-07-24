@@ -12,11 +12,12 @@ export default function ContentNav() {
       <Link href="/" className="no-underline" style={{ color: "inherit" }}>
         zhanbo.art
       </Link>
-      <div className="flex items-center gap-5">
+      <div className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
         <Link href="/journal" className="no-underline" style={{ color: "inherit" }}>Journal</Link>
         <Link href="/notes" className="no-underline" style={{ color: "inherit" }}>Notes</Link>
         <Link href="/photos" className="no-underline" style={{ color: "inherit" }}>Photos</Link>
         <Link href="/music" className="no-underline" style={{ color: "inherit" }}>Music</Link>
+        <Link href="/thoughts" className="no-underline" style={{ color: "inherit" }}>Thoughts</Link>
         <Link href="/archive" className="no-underline" style={{ color: "inherit" }}>Archive</Link>
         <div className="ml-2">
           <ThemeToggle />

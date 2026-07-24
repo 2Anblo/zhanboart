@@ -6,7 +6,7 @@ export const dynamic = "force-static";
 const baseUrl = "https://zhanbo.art";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticRoutes = ["", "/journal", "/notes", "/photos", "/music", "/archive"].map((route) => ({
+  const staticRoutes = ["", "/journal", "/notes", "/photos", "/music", "/thoughts", "/archive"].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
   }));
