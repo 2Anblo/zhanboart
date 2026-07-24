@@ -103,7 +103,7 @@ export default function OpeningAnimation({ onComplete }: { onComplete?: () => vo
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        pointerEvents: "none",
+        pointerEvents: "auto",
       }}
     >
       <div

@@ -90,7 +90,7 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-[200]"
+      className="fixed inset-0 z-[200] overflow-y-auto"
       style={{ background: bgColor, transition: 'background-color 0.3s ease' }}
     >
       {navigationConfig.closeLabel && (
@@ -120,9 +120,9 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
         </button>
       )}
 
-      <div className="flex items-center justify-center w-full h-full px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-16 max-w-[1200px] w-full">
-          <div ref={linksRef} className="flex flex-col gap-2">
+      <div className="flex min-h-svh w-full items-start px-6 pb-12 pt-24 md:items-center md:px-8 md:py-24">
+        <div className="mx-auto grid w-full max-w-[1200px] grid-cols-1 gap-10 md:grid-cols-[minmax(0,1.1fr)_minmax(16rem,0.9fr)] md:gap-16">
+          <div ref={linksRef} className="flex flex-col gap-3 md:gap-2">
             {navigationConfig.fullscreenMenuLinks.map((link) => (
               <button
                 key={link.target}
@@ -130,9 +130,9 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
                 onClick={() => handleLinkClick(link.target)}
                 style={{
                   fontFamily: 'var(--font-serif)',
-                  fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+                  fontSize: 'clamp(2.25rem, 7vw, 4rem)',
                   color: textColor,
-                  lineHeight: 1.8,
+                  lineHeight: 1.05,
                   border: 'none',
                   position: 'relative',
                   display: 'inline-block',
@@ -151,7 +151,7 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
           </div>
 
           {navigationConfig.menuSideInfo.length > 0 && (
-            <div className="flex flex-col gap-8 justify-center">
+            <div className="flex flex-col justify-start gap-5 pt-4 md:justify-center md:gap-8 md:pt-0">
               {navigationConfig.menuSideInfo.map((info, i) => (
                 <div
                   key={i}
@@ -173,4 +173,3 @@ export default function FullScreenMenu({ isOpen, onClose, onNavigate }: FullScre
     </div>
   );
 }
-

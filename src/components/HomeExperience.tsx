@@ -46,16 +46,16 @@ export default function HomeExperience({
   return (
     <div className="relative">
       <OpeningAnimation onComplete={handleOpeningComplete} />
+      <FullScreenMenu isOpen={menuOpen} onClose={handleMenuClose} onNavigate={handleNavigate} />
       <div
         style={{
           opacity: openingDone ? 1 : 0.92,
-          transform: openingDone ? "scale(1)" : "scale(1.005)",
+          transform: openingDone ? "none" : "scale(1.005)",
           transition: "opacity 0.9s ease, transform 0.9s ease",
           transformOrigin: "center top",
         }}
       >
         <Navigation onMenuOpen={handleMenuOpen} />
-        <FullScreenMenu isOpen={menuOpen} onClose={handleMenuClose} onNavigate={handleNavigate} />
         <main>
           <HeroRoomGallery entries={recentEntries} />
           <ParticleSculpture />
