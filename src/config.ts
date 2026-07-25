@@ -19,7 +19,7 @@ export const siteConfig: SiteConfig = {
 export interface NavigationConfig {
   menuLabel: string
   closeLabel: string
-  fullscreenMenuLinks: { label: string; target: string }[]
+  fullscreenMenuLinks: { label: string; href: string }[]
   menuSideInfo: string[]
 }
 
@@ -27,11 +27,13 @@ export const navigationConfig: NavigationConfig = {
   menuLabel: "菜单",
   closeLabel: "关闭",
   fullscreenMenuLinks: [
-    { label: "入口", target: "hero" },
-    { label: "日志", target: "consciousness" },
-    { label: "笔记", target: "lighthouse" },
-    { label: "音乐", target: "music" },
-    { label: "关于", target: "footer" },
+    { label: "首页", href: "/" },
+    { label: "日志", href: "/journal" },
+    { label: "笔记", href: "/notes" },
+    { label: "照片", href: "/photos" },
+    { label: "音乐", href: "/music" },
+    { label: "想法", href: "/thoughts" },
+    { label: "归档", href: "/archive" },
   ],
   menuSideInfo: [
     "ZHANBO.ART 2026",

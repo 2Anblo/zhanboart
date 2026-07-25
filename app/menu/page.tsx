@@ -22,7 +22,7 @@ export default function MenuPage() {
       <div className="menu-page__inner">
         <div className="menu-page__links" aria-label="Site menu">
           {navigationConfig.fullscreenMenuLinks.map((link) => (
-            <Link key={link.target} href={`/#${link.target}`} className="menu-page__link">
+            <Link key={link.href} href={link.href} className="menu-page__link">
               {link.label}
             </Link>
           ))}
