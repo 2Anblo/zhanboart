@@ -4,8 +4,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "tinacms dev -c \"next dev\"",
+    "build": "node scripts/build-tina.mjs && next build",
     "start": "next start",
     "lint": "eslint ."
   },
@@ -24,6 +24,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@playwright/test": "^1.61.1",
+    "@tinacms/cli": "^2.5.6",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
@@ -35,6 +36,7 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.19",
     "tailwindcss-animate": "^1.0.7",
+    "tinacms": "^3.11.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.46.4"
   }
