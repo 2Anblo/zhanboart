@@ -4,6 +4,7 @@ import { getEntry } from "@/lib/content";
 import ContentNav from "@/components/ContentNav";
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
 import MusicPlayer from "@/components/MusicPlayer";
+import ProgressiveBlurFade from "@/components/ProgressiveBlurFade";
 
 export default function ContentDetailPage({ type, slug }: { type: ContentType; slug: string }) {
   const entry = getEntry(type, slug);
@@ -12,6 +13,7 @@ export default function ContentDetailPage({ type, slug }: { type: ContentType; s
   return (
     <article className="content-shell">
       <ContentNav />
+      <ProgressiveBlurFade />
       <div className="content-inner">
         <div className="content-kicker">
           {entry.date}{entry.location ? ` / ${entry.location}` : ""}{entry.mood ? ` / ${entry.mood}` : ""}

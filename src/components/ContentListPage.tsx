@@ -2,6 +2,7 @@ import type { ContentType } from "@/lib/content";
 import { getPublicEntries } from "@/lib/content";
 import { EntryList } from "@/components/EntryList";
 import ContentNav from "@/components/ContentNav";
+import ProgressiveBlurFade from "@/components/ProgressiveBlurFade";
 
 const pageConfig: Record<ContentType, { title: string; kicker: string }> = {
   journal: { title: "Journal", kicker: "Longer records" },
@@ -18,6 +19,7 @@ export default function ContentListPage({ type }: { type: ContentType }) {
   return (
     <div className="content-shell">
       <ContentNav />
+      <ProgressiveBlurFade />
       <div className="content-inner">
         <div className="content-kicker">{config.kicker}</div>
         <h1 className="content-title">{config.title}</h1>

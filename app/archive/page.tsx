@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ContentNav from "@/components/ContentNav";
+import ProgressiveBlurFade from "@/components/ProgressiveBlurFade";
 import { getAllEntries } from "@/lib/content";
 
 export default function ArchivePage() {
@@ -9,6 +10,7 @@ export default function ArchivePage() {
   return (
     <div className="content-shell">
       <ContentNav />
+      <ProgressiveBlurFade />
       <div className="content-inner">
         <div className="content-kicker">All public fragments</div>
         <h1 className="content-title">Archive</h1>

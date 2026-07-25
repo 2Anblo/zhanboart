@@ -1,4 +1,5 @@
 import Link from "next/link";
+import ProgressiveBlurFade from "@/components/ProgressiveBlurFade";
 import ThemeToggle from "@/components/ThemeToggle";
 import { navigationConfig, siteConfig } from "@/config";
 
@@ -18,6 +19,7 @@ export default function MenuPage() {
           </Link>
         </div>
       </nav>
+      <ProgressiveBlurFade />
 
       <div className="menu-page__inner">
         <div className="menu-page__links" aria-label="Site menu">

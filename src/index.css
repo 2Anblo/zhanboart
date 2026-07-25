@@ -405,6 +405,8 @@ html.light .ticker-line {
 
 /* Markdown content surfaces */
 .content-shell {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   background: var(--color-void);
   color: var(--color-inverse-text);
@@ -412,8 +414,85 @@ html.light .ticker-line {
 }
 
 .content-inner {
+  position: relative;
+  z-index: 1;
   width: min(920px, 100%);
   margin: 0 auto;
+}
+
+.progressive-blur-fade {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  height: 80px;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.progressive-blur-fade__layer,
+.progressive-blur-fade__tint {
+  position: absolute;
+  inset: 0;
+}
+
+.progressive-blur-fade__layer--1 {
+  -webkit-backdrop-filter: blur(48px);
+  backdrop-filter: blur(48px);
+  -webkit-mask: linear-gradient(to bottom, transparent 0%, black 0%, black 12.5%, transparent 25%);
+  mask: linear-gradient(to bottom, transparent 0%, black 0%, black 12.5%, transparent 25%);
+}
+
+.progressive-blur-fade__layer--2 {
+  -webkit-backdrop-filter: blur(32px);
+  backdrop-filter: blur(32px);
+  -webkit-mask: linear-gradient(to bottom, transparent 0%, black 12.5%, black 25%, transparent 37.5%);
+  mask: linear-gradient(to bottom, transparent 0%, black 12.5%, black 25%, transparent 37.5%);
+}
+
+.progressive-blur-fade__layer--3 {
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  -webkit-mask: linear-gradient(to bottom, transparent 12.5%, black 25%, black 37.5%, transparent 50%);
+  mask: linear-gradient(to bottom, transparent 12.5%, black 25%, black 37.5%, transparent 50%);
+}
+
+.progressive-blur-fade__layer--4 {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  -webkit-mask: linear-gradient(to bottom, transparent 25%, black 37.5%, black 50%, transparent 62.5%);
+  mask: linear-gradient(to bottom, transparent 25%, black 37.5%, black 50%, transparent 62.5%);
+}
+
+.progressive-blur-fade__layer--5 {
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  -webkit-mask: linear-gradient(to bottom, transparent 37.5%, black 50%, black 62.5%, transparent 75%);
+  mask: linear-gradient(to bottom, transparent 37.5%, black 50%, black 62.5%, transparent 75%);
+}
+
+.progressive-blur-fade__layer--6 {
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  -webkit-mask: linear-gradient(to bottom, transparent 50%, black 62.5%, black 75%, transparent 87.5%);
+  mask: linear-gradient(to bottom, transparent 50%, black 62.5%, black 75%, transparent 87.5%);
+}
+
+.progressive-blur-fade__layer--7 {
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
+  -webkit-mask: linear-gradient(to bottom, transparent 62.5%, black 75%, black 87.5%, transparent 100%);
+  mask: linear-gradient(to bottom, transparent 62.5%, black 75%, black 87.5%, transparent 100%);
+}
+
+.progressive-blur-fade__tint {
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 10, 11, 0.62) 0%,
+    rgba(10, 10, 11, 0.3) 50%,
+    rgba(10, 10, 11, 0) 100%
+  );
 }
 
 .content-kicker {
@@ -505,6 +584,8 @@ html.light .ticker-line {
 }
 
 .menu-page {
+  position: relative;
+  isolation: isolate;
   min-height: 100svh;
   background: var(--color-void);
   color: var(--color-inverse-text);
@@ -551,6 +632,8 @@ html.light .ticker-line {
 }
 
 .menu-page__inner {
+  position: relative;
+  z-index: 1;
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.9fr);
   gap: clamp(3rem, 8vw, 6rem);
@@ -604,6 +687,15 @@ html.light .ticker-line {
 html.light .content-shell {
   background: var(--day-bg);
   color: var(--day-text);
+}
+
+html.light .progressive-blur-fade__tint {
+  background: linear-gradient(
+    to bottom,
+    rgba(251, 247, 236, 0.62) 0%,
+    rgba(251, 247, 236, 0.3) 50%,
+    rgba(251, 247, 236, 0) 100%
+  );
 }
 
 html.light .content-kicker {
