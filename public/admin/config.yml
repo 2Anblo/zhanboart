@@ -1,0 +1,166 @@
+backend:
+  name: github
+  repo: 2Anblo/zhanboart
+  branch: master
+
+local_backend: true
+publish_mode: editorial_workflow
+
+site_url: https://zhanbo.art
+display_url: https://zhanbo.art
+logo_url: /images/dark-mode.png
+
+media_folder: public/uploads
+public_folder: /uploads
+
+slug:
+  encoding: ascii
+  clean_accents: true
+  sanitize_replacement: "-"
+
+collections:
+  - name: journal
+    label: 日志
+    label_singular: 日志
+    folder: content/journal
+    create: true
+    format: frontmatter
+    extension: md
+    preview_path: journal/{{slug}}
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}} - {{date}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 日期, name: date, widget: date, format: "YYYY-MM-DD" }
+      - { label: 类型, name: type, widget: hidden, default: journal }
+      - { label: 摘要, name: excerpt, widget: text, required: false }
+      - { label: 心情, name: mood, widget: string, required: false }
+      - { label: 地点, name: location, widget: string, required: false }
+      - { label: 标签, name: tags, widget: list, required: false, allow_add: true }
+      - label: 可见性
+        name: visibility
+        widget: select
+        default: draft
+        options:
+          - { label: 公开, value: public }
+          - { label: 不列出, value: unlisted }
+          - { label: 草稿, value: draft }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: notes
+    label: 笔记
+    label_singular: 笔记
+    folder: content/notes
+    create: true
+    format: frontmatter
+    extension: md
+    preview_path: notes/{{slug}}
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}} - {{date}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 日期, name: date, widget: date, format: "YYYY-MM-DD" }
+      - { label: 类型, name: type, widget: hidden, default: notes }
+      - { label: 摘要, name: excerpt, widget: text, required: false }
+      - { label: 心情, name: mood, widget: string, required: false }
+      - { label: 地点, name: location, widget: string, required: false }
+      - { label: 标签, name: tags, widget: list, required: false, allow_add: true }
+      - label: 可见性
+        name: visibility
+        widget: select
+        default: draft
+        options:
+          - { label: 公开, value: public }
+          - { label: 不列出, value: unlisted }
+          - { label: 草稿, value: draft }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: photos
+    label: 照片
+    label_singular: 照片
+    folder: content/photos
+    create: true
+    format: frontmatter
+    extension: md
+    preview_path: photos/{{slug}}
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}} - {{date}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 日期, name: date, widget: date, format: "YYYY-MM-DD" }
+      - { label: 类型, name: type, widget: hidden, default: photos }
+      - { label: 摘要, name: excerpt, widget: text, required: false }
+      - { label: 图片, name: image, widget: image, required: false }
+      - { label: 图片说明, name: caption, widget: string, required: false }
+      - { label: 心情, name: mood, widget: string, required: false }
+      - { label: 地点, name: location, widget: string, required: false }
+      - { label: 标签, name: tags, widget: list, required: false, allow_add: true }
+      - label: 可见性
+        name: visibility
+        widget: select
+        default: draft
+        options:
+          - { label: 公开, value: public }
+          - { label: 不列出, value: unlisted }
+          - { label: 草稿, value: draft }
+      - { label: 正文, name: body, widget: markdown, required: false }
+
+  - name: music
+    label: 音乐
+    label_singular: 音乐
+    folder: content/music
+    create: true
+    format: frontmatter
+    extension: md
+    preview_path: music/{{slug}}
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}} - {{date}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 日期, name: date, widget: date, format: "YYYY-MM-DD" }
+      - { label: 类型, name: type, widget: hidden, default: music }
+      - { label: 艺术家, name: artist, widget: string, required: false }
+      - { label: 摘要, name: excerpt, widget: text, required: false }
+      - { label: 音频, name: audio, widget: file, required: false }
+      - { label: 封面, name: albumArt, widget: image, required: false }
+      - { label: 图片, name: image, widget: image, required: false }
+      - { label: 心情, name: mood, widget: string, required: false }
+      - { label: 地点, name: location, widget: string, required: false }
+      - { label: 标签, name: tags, widget: list, required: false, allow_add: true }
+      - label: 可见性
+        name: visibility
+        widget: select
+        default: draft
+        options:
+          - { label: 公开, value: public }
+          - { label: 不列出, value: unlisted }
+          - { label: 草稿, value: draft }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: thoughts
+    label: 想法
+    label_singular: 想法
+    folder: content/thoughts
+    create: true
+    format: frontmatter
+    extension: md
+    preview_path: thoughts/{{slug}}
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "{{title}} - {{date}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 日期, name: date, widget: date, format: "YYYY-MM-DD" }
+      - { label: 类型, name: type, widget: hidden, default: thoughts }
+      - { label: 摘要, name: excerpt, widget: text, required: false }
+      - { label: 心情, name: mood, widget: string, required: false }
+      - { label: 地点, name: location, widget: string, required: false }
+      - { label: 标签, name: tags, widget: list, required: false, allow_add: true }
+      - label: 可见性
+        name: visibility
+        widget: select
+        default: draft
+        options:
+          - { label: 公开, value: public }
+          - { label: 不列出, value: unlisted }
+          - { label: 草稿, value: draft }
+      - { label: 正文, name: body, widget: markdown }
