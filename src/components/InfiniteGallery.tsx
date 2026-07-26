@@ -222,9 +222,9 @@ export default function InfiniteGallery({ entries }: InfiniteGalleryProps) {
       const dx = e.clientX - dragStartX.current;
       const dy = e.clientY - dragStartY.current;
       offsetX.current -= dx;
-      offsetY.current -= dy;
+      offsetY.current += dy; // match wheel direction: drag down → view moves down
       velocityX.current = -dx;
-      velocityY.current = -dy;
+      velocityY.current = dy;
       dragMoved.current += Math.abs(dx) + Math.abs(dy);
       dragStartX.current = e.clientX;
       dragStartY.current = e.clientY;
