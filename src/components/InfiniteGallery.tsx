@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import type { ContentEntry } from "@/lib/content";
-import { generateScatterLayout, CANVAS_W } from "./galleryLayout";
+import { generateScatterLayout, getScatterLayoutHeight, CANVAS_W } from "./galleryLayout";
 import type { GalleryItem } from "./galleryLayout";
 import "./InfiniteGallery.css";
 
@@ -40,6 +40,7 @@ export default function InfiniteGallery({ entries }: InfiniteGalleryProps) {
   const isLight = theme === "light";
 
   const [items] = useState<GalleryItem[]>(() => generateScatterLayout(entries));
+  const [canvasH] = useState(() => getScatterLayoutHeight(items));
 
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -106,19 +107,8 @@ export default function InfiniteGallery({ entries }: InfiniteGalleryProps) {
 
       offsetX.current += velocityX.current;
       offsetY.current += velocityY.current;
-
-      // Soft vertical bounds: allow scrolling to see all rows
-      const maxBaseY = items.length > 0 ? Math.max(...items.map((i) => i.baseY)) : 0;
-      const maxY = maxBaseY + 200;
-      const minY = -200;
-      if (offsetY.current > maxY) {
-        offsetY.current = maxY;
-        velocityY.current = 0;
-      }
-      if (offsetY.current < minY) {
-        offsetY.current = minY;
-        velocityY.current = 0;
-      }
+      offsetX.current = wrap(offsetX.current, CANVAS_W);
+      offsetY.current = wrap(offsetY.current, canvasH);
 
       const scene = sceneRef.current;
       if (!scene || items.length === 0) {
@@ -143,12 +133,14 @@ export default function InfiniteGallery({ entries }: InfiniteGalleryProps) {
         if (!card) return;
 
         const rawX = item.baseX - offsetX.current + parallaxX.current * PARALLAX_STRENGTH_X;
+        const rawY = item.baseY - offsetY.current + parallaxY.current * PARALLAX_STRENGTH_Y;
         const wrappedX = wrap(rawX, CANVAS_W);
+        const wrappedY = wrap(rawY, canvasH);
         const screenX = wrappedX + centerX - item.width / 2;
-        const screenY = item.baseY - offsetY.current + parallaxY.current * PARALLAX_STRENGTH_Y + centerY - item.height / 2;
+        const screenY = wrappedY + centerY - item.height / 2;
 
-        const dx = wrappedX - centerX + item.width / 2;
-        const dy = screenY - centerY + item.height / 2;
+        const dx = wrappedX;
+        const dy = wrappedY;
         const dist = Math.sqrt(dx * dx + dy * dy);
 
         if (dist < nearestDist) {
@@ -194,7 +186,7 @@ export default function InfiniteGallery({ entries }: InfiniteGalleryProps) {
 
     rafRef.current = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [isMobile, items, setBackground]);
+  }, [canvasH, isMobile, items, setBackground]);
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent) => {

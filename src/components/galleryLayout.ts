@@ -15,6 +15,8 @@ export interface GalleryItem {
 }
 
 const CANVAS_W = 3200;
+const CANVAS_H_MIN = 1600;
+const CANVAS_Y_PADDING = 520;
 const BASE_CARD_W = 280;
 const BASE_CARD_H = 380;
 const ROW_HEIGHT_MIN = 420;
@@ -114,6 +116,14 @@ export function generateScatterLayout(entries: ContentEntry[]): GalleryItem[] {
   }
 
   return items;
+}
+
+export function getScatterLayoutHeight(items: GalleryItem[]) {
+  if (items.length === 0) return CANVAS_H_MIN;
+
+  const top = Math.min(...items.map((item) => item.baseY - item.height / 2));
+  const bottom = Math.max(...items.map((item) => item.baseY + item.height / 2));
+  return Math.max(CANVAS_H_MIN, Math.ceil(bottom - top + CANVAS_Y_PADDING));
 }
 
 export { CANVAS_W };
