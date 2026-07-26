@@ -49,7 +49,7 @@ export default function InfiniteGallery({ entries }: InfiniteGalleryProps) {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const offsetX = useRef(0);
-  const offsetY = useRef(0);
+  const offsetY = useRef(items.length > 0 ? items[0].baseY - 120 : 0);
   const velocityX = useRef(0);
   const velocityY = useRef(0);
   const dragStartX = useRef(0);
@@ -107,8 +107,10 @@ export default function InfiniteGallery({ entries }: InfiniteGalleryProps) {
       offsetX.current += velocityX.current;
       offsetY.current += velocityY.current;
 
-      const maxY = 200;
-      const minY = -Math.max(0, items.length > 0 ? Math.max(...items.map((i) => i.baseY)) - 600 : 0);
+      // Soft vertical bounds: allow scrolling to see all rows
+      const maxBaseY = items.length > 0 ? Math.max(...items.map((i) => i.baseY)) : 0;
+      const maxY = maxBaseY + 200;
+      const minY = -200;
       if (offsetY.current > maxY) {
         offsetY.current = maxY;
         velocityY.current = 0;
@@ -242,6 +244,7 @@ export default function InfiniteGallery({ entries }: InfiniteGalleryProps) {
     if (!el) return;
     const handler = (e: WheelEvent) => {
       e.preventDefault();
+      e.stopPropagation();
       const dx = e.deltaX || (e.shiftKey ? e.deltaY : 0);
       const dy = e.shiftKey ? 0 : e.deltaY;
       offsetX.current += dx;
