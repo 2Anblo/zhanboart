@@ -45,6 +45,21 @@ export function generateScatterLayout(entries: ContentEntry[]): GalleryItem[] {
   // Keep cycling through entries if we need more slots (for infinite feel)
   const getEntry = (i: number) => entries[i % entries.length];
 
+  // Collect unique images from entries, then supplement with gallery/item{X}.jpg
+  const uniqueEntryImages = Array.from(
+    new Set(entries.map((e) => e.image).filter((img): img is string => Boolean(img)))
+  );
+  const GALLERY_POOL_SIZE = 9; // item1.jpg ~ item9.jpg
+  const allImages: string[] =
+    uniqueEntryImages.length >= GALLERY_POOL_SIZE
+      ? uniqueEntryImages
+      : [
+          ...uniqueEntryImages,
+          ...Array.from({ length: GALLERY_POOL_SIZE }, (_, i) => `/images/gallery/item${i + 1}.jpg`).filter(
+            (img) => !uniqueEntryImages.includes(img)
+          ),
+        ];
+
   // Generate enough rows to fill ~3 viewport heights worth of content
   const targetRows = Math.max(4, Math.ceil(entries.length * 0.6));
 
@@ -77,9 +92,12 @@ export function generateScatterLayout(entries: ContentEntry[]): GalleryItem[] {
       const baseX = startX + col * (photoWidth + rand(GAP_X_MIN, GAP_X_MAX)) + jitterX;
       const baseY = currentY + jitterY;
 
+      // Distribute different images across cards
+      const image = allImages[(entryIndex - 1) % allImages.length];
+
       items.push({
         id: `${entry.slug}-${entryIndex}`,
-        image: entry.image || `/images/gallery/item${(entryIndex % 9) + 1}.jpg`,
+        image,
         title: entry.title,
         year: entry.date ? entry.date.slice(0, 4) : "",
         caption: entry.caption || entry.excerpt,
