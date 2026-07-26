@@ -1,0 +1,729 @@
+/* ============================================================
+   Infinite Gallery — 3D Free-Scatter Infinite Canvas
+   ============================================================ */
+
+.ig-section {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--night-bg);
+  color: var(--night-text);
+  font-family: var(--font-sans);
+}
+
+.ig-light.ig-section {
+  background: var(--day-bg);
+  color: var(--day-text);
+}
+
+/* Empty state */
+.ig-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--night-muted);
+  letter-spacing: 0.1em;
+}
+
+/* ============================
+   Background Layer
+   ============================ */
+
+.ig-bg-layer {
+  position: absolute;
+  inset: -80px;
+  z-index: 0;
+}
+
+.ig-bg-image {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(50px) brightness(0.35) saturate(1.1);
+  transition: opacity 0.9s var(--ease-gallery, cubic-bezier(0.22, 1, 0.36, 1));
+  transform: scale(1.25);
+  opacity: 0;
+}
+
+.ig-bg-image.ig-bg-front {
+  opacity: 1;
+}
+
+.ig-bg-tint {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 10, 11, 0.3);
+}
+
+.ig-light .ig-bg-tint {
+  background: rgba(251, 247, 236, 0.35);
+}
+
+/* ============================
+   Grain + Vignette
+   ============================ */
+
+.ig-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 30;
+  opacity: 0.035;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px;
+}
+
+.ig-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 25;
+  background: radial-gradient(
+    ellipse 65% 60% at 50% 50%,
+    transparent 0%,
+    transparent 30%,
+    rgba(10, 14, 26, 0.15) 50%,
+    rgba(10, 14, 26, 0.4) 70%,
+    rgba(10, 14, 26, 0.7) 90%,
+    rgba(10, 14, 26, 0.85) 100%
+  );
+}
+
+.ig-light .ig-vignette {
+  background: radial-gradient(
+    ellipse 65% 60% at 50% 50%,
+    transparent 0%,
+    transparent 30%,
+    rgba(42, 41, 38, 0.06) 50%,
+    rgba(42, 41, 38, 0.15) 70%,
+    rgba(42, 41, 38, 0.3) 90%,
+    rgba(42, 41, 38, 0.45) 100%
+  );
+}
+
+/* ============================
+   Header + Counter
+   ============================ */
+
+.ig-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 32px 44px;
+  z-index: 35;
+  pointer-events: none;
+}
+
+.ig-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--night-muted);
+  letter-spacing: 3px;
+  display: block;
+  margin-bottom: 6px;
+  opacity: 0.6;
+}
+
+.ig-light .ig-eyebrow {
+  color: var(--day-muted);
+}
+
+.ig-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-weight: 400;
+  color: var(--night-text);
+  margin: 0;
+  line-height: 1;
+}
+
+.ig-light .ig-title {
+  color: var(--day-text);
+}
+
+.ig-subtitle {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--night-muted);
+  margin: 6px 0 0;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+}
+
+.ig-light .ig-subtitle {
+  color: var(--day-muted);
+}
+
+.ig-counter {
+  position: absolute;
+  top: 36px;
+  right: 44px;
+  z-index: 35;
+  pointer-events: none;
+}
+
+.ig-counter span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--night-muted);
+  letter-spacing: 2px;
+  opacity: 0.5;
+}
+
+.ig-light .ig-counter span {
+  color: var(--day-muted);
+}
+
+/* ============================
+   3D Scene Container
+   ============================ */
+
+.ig-container {
+  position: absolute;
+  inset: 0;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  z-index: 15;
+}
+
+.ig-container.ig-dragging {
+  cursor: grabbing;
+}
+
+.ig-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  perspective: 1200px;
+}
+
+/* ============================
+   HUD Frame
+   ============================ */
+
+.ig-hud {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 200;
+  will-change: transform;
+  transition: transform 0.15s ease-out, width 0.15s ease-out, height 0.15s ease-out;
+}
+
+.ig-hud-corner {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-color: var(--night-text);
+  border-style: solid;
+  border-width: 0;
+  opacity: 0.35;
+}
+
+.ig-light .ig-hud-corner {
+  border-color: var(--day-text);
+}
+
+.ig-hud-corner.tl {
+  top: 0;
+  left: 0;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.ig-hud-corner.tr {
+  top: 0;
+  right: 0;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+.ig-hud-corner.bl {
+  bottom: 0;
+  left: 0;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+.ig-hud-corner.br {
+  bottom: 0;
+  right: 0;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+.ig-hud-ruler-v {
+  position: absolute;
+  top: 25px;
+  left: -20px;
+  width: 12px;
+  height: calc(100% - 50px);
+  border-left: 1px solid rgba(230, 225, 216, 0.12);
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 19px,
+    rgba(230, 225, 216, 0.1) 19px,
+    rgba(230, 225, 216, 0.1) 20px
+  );
+}
+
+.ig-light .ig-hud-ruler-v {
+  border-left-color: rgba(42, 41, 38, 0.12);
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent,
+    transparent 19px,
+    rgba(42, 41, 38, 0.08) 19px,
+    rgba(42, 41, 38, 0.08) 20px
+  );
+}
+
+.ig-hud-ruler-h {
+  position: absolute;
+  bottom: -18px;
+  left: 25px;
+  height: 10px;
+  width: calc(100% - 50px);
+  border-top: 1px solid rgba(230, 225, 216, 0.12);
+  background: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent 19px,
+    rgba(230, 225, 216, 0.1) 19px,
+    rgba(230, 225, 216, 0.1) 20px
+  );
+}
+
+.ig-light .ig-hud-ruler-h {
+  border-top-color: rgba(42, 41, 38, 0.12);
+  background: repeating-linear-gradient(
+    to right,
+    transparent,
+    transparent 19px,
+    rgba(42, 41, 38, 0.08) 19px,
+    rgba(42, 41, 38, 0.08) 20px
+  );
+}
+
+.ig-hud-info {
+  position: absolute;
+  bottom: -36px;
+  right: 0;
+}
+
+.ig-hud-coords {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--night-muted);
+  letter-spacing: 1.5px;
+  opacity: 0.5;
+}
+
+.ig-light .ig-hud-coords {
+  color: var(--day-muted);
+}
+
+/* ============================
+   Cards
+   ============================ */
+
+.ig-card {
+  position: absolute;
+  top: 0;
+  left: 0;
+  border-radius: 6px;
+  will-change: transform, opacity, filter;
+  transform-style: preserve-3d;
+  cursor: pointer;
+  transition: filter 0.4s var(--ease-gallery, cubic-bezier(0.22, 1, 0.36, 1)),
+    opacity 0.4s var(--ease-gallery, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.ig-card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.ig-front {
+  z-index: 2;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+}
+
+.ig-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.ig-card-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 6px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 150px;
+  opacity: 0.04;
+  mix-blend-mode: overlay;
+}
+
+/* Card Back */
+.ig-back {
+  transform: rotateY(180deg);
+  background: linear-gradient(170deg, #12182a, #0c1020 40%, #080c18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
+}
+
+.ig-light .ig-back {
+  background: linear-gradient(170deg, #fffdf6, #f5f0e4 40%, #ebe5d6);
+}
+
+.ig-back-content {
+  padding: 28px 22px;
+  text-align: center;
+  width: 100%;
+}
+
+.ig-back-year {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgba(230, 225, 216, 0.35);
+  letter-spacing: 4px;
+  display: block;
+}
+
+.ig-light .ig-back-year {
+  color: rgba(42, 41, 38, 0.4);
+}
+
+.ig-back-divider {
+  width: 40px;
+  height: 1px;
+  background: rgba(230, 225, 216, 0.12);
+  margin: 14px auto;
+}
+
+.ig-light .ig-back-divider {
+  background: rgba(42, 41, 38, 0.12);
+}
+
+.ig-back-title {
+  font-family: var(--font-serif);
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 400;
+  color: rgba(230, 225, 216, 0.9);
+  margin: 0;
+  letter-spacing: 0.5px;
+  line-height: 1.2;
+}
+
+.ig-light .ig-back-title {
+  color: rgba(42, 41, 38, 0.9);
+}
+
+.ig-back-caption {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  color: rgba(230, 225, 216, 0.55);
+  line-height: 1.7;
+  margin: 0;
+}
+
+.ig-light .ig-back-caption {
+  color: rgba(42, 41, 38, 0.55);
+}
+
+.ig-back-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(230, 225, 216, 0.08);
+}
+
+.ig-light .ig-back-footer {
+  border-top-color: rgba(42, 41, 38, 0.08);
+}
+
+.ig-back-id {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: rgba(230, 225, 216, 0.3);
+  letter-spacing: 2px;
+}
+
+.ig-light .ig-back-id {
+  color: rgba(42, 41, 38, 0.35);
+}
+
+.ig-back-arrow,
+.ig-back-link {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgba(230, 225, 216, 0.45);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.ig-light .ig-back-arrow,
+.ig-light .ig-back-link {
+  color: rgba(42, 41, 38, 0.45);
+}
+
+.ig-back-arrow:hover,
+.ig-back-link:hover {
+  color: var(--color-amber);
+}
+
+/* Flip */
+.ig-card .ig-card-face {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ig-card.flipped .ig-front {
+  transform: rotateY(180deg);
+}
+
+.ig-card.flipped .ig-back {
+  transform: rotateY(0deg);
+}
+
+/* ============================
+   Hint
+   ============================ */
+
+.ig-hint {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 35;
+  pointer-events: none;
+}
+
+.ig-hint span {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--night-muted);
+  letter-spacing: 3px;
+  opacity: 0.35;
+}
+
+.ig-light .ig-hint span {
+  color: var(--day-muted);
+}
+
+/* ============================
+   Mobile Carousel
+   ============================ */
+
+.ig-mobile {
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 0;
+  overflow: clip;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 30px;
+}
+
+.ig-mobile .ig-bg-layer {
+  inset: 0;
+}
+
+.ig-mobile .ig-bg-image {
+  filter: blur(30px) brightness(0.3) saturate(1);
+}
+
+.ig-mobile .ig-header {
+  position: relative;
+  padding: 24px 20px 12px;
+}
+
+.ig-mobile .ig-counter {
+  position: absolute;
+  top: 28px;
+  right: 20px;
+}
+
+.ig-mob-strip {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 20px 16px;
+  flex: 1;
+  align-items: center;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ig-mob-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.ig-mob-card {
+  flex: 0 0 70vw;
+  max-width: 280px;
+  aspect-ratio: 3 / 4;
+  border-radius: 8px;
+  scroll-snap-align: center;
+  perspective: 800px;
+  cursor: pointer;
+  transition: transform 0.4s var(--ease-gallery, cubic-bezier(0.22, 1, 0.36, 1)),
+    opacity 0.4s var(--ease-gallery, cubic-bezier(0.22, 1, 0.36, 1));
+  opacity: 0.5;
+  transform: scale(0.9);
+}
+
+.ig-mob-card.flipped {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ig-mob-card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ig-mob-card.flipped .ig-mob-card-inner {
+  transform: rotateY(180deg);
+}
+
+.ig-mob-front {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.ig-mob-front img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.ig-mob-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: rotateY(180deg);
+  padding: 28px 20px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(170deg, #12182a, #0c1020 40%, #080c18);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.ig-light .ig-mob-back {
+  background: linear-gradient(170deg, #fffdf6, #f5f0e4 40%, #ebe5d6);
+}
+
+.ig-mob-back .ig-back-title {
+  font-size: 16px;
+}
+
+.ig-mob-back .ig-back-caption,
+.ig-mob-back .ig-back-year {
+  font-size: 10px;
+}
+
+.ig-mob-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0 6px;
+}
+
+.ig-mob-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(230, 225, 216, 0.2);
+  transition: all 0.3s var(--ease-gallery, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.ig-light .ig-mob-dot {
+  background: rgba(42, 41, 38, 0.2);
+}
+
+.ig-mob-dot.active {
+  background: var(--night-text);
+  opacity: 0.6;
+  transform: scale(1.3);
+}
+
+.ig-light .ig-mob-dot.active {
+  background: var(--day-text);
+}
+
+/* ============================
+   Reduced Motion
+   ============================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .ig-card,
+  .ig-hud,
+  .ig-bg-image,
+  .ig-mob-card,
+  .ig-mob-card-inner {
+    transition: none !important;
+  }
+}
+
+/* ============================
+   Mobile overrides
+   ============================ */
+
+@media (max-width: 768px) {
+  .ig-container,
+  .ig-scene,
+  .ig-hud,
+  .ig-vignette {
+    display: none;
+  }
+}
+
+@media (min-width: 769px) {
+  .ig-mob-strip,
+  .ig-mob-dots {
+    display: none;
+  }
+}

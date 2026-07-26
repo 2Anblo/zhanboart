@@ -759,3 +759,26 @@ html.light .menu-page__side {
 .fluid-cursor {
   pointer-events: none !important;
 }
+
+/* ============================
+   Gallery Page Shell
+   ============================ */
+
+.gallery-page {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+}
+
+.gallery-page .content-shell {
+  padding: 0;
+  background: transparent;
+}
+
+/* ============================
+   Gallery Easing
+   ============================ */
+
+:root {
+  --ease-gallery: cubic-bezier(0.22, 1, 0.36, 1);
+}
