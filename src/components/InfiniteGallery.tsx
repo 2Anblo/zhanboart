@@ -25,6 +25,7 @@ const NEAREST_DIST_THRESHOLD = 160;
 
 interface InfiniteGalleryProps {
   entries: ContentEntry[];
+  galleryImages?: string[];
 }
 
 function wrap(value: number, range: number) {
@@ -35,11 +36,11 @@ function wrap(value: number, range: number) {
   return result;
 }
 
-export default function InfiniteGallery({ entries }: InfiniteGalleryProps) {
+export default function InfiniteGallery({ entries, galleryImages }: InfiniteGalleryProps) {
   const { theme } = useTheme();
   const isLight = theme === "light";
 
-  const [items] = useState<GalleryItem[]>(() => generateScatterLayout(entries));
+  const [items] = useState<GalleryItem[]>(() => generateScatterLayout(entries, galleryImages));
   const [canvasH] = useState(() => getScatterLayoutHeight(items));
 
   const containerRef = useRef<HTMLDivElement>(null);

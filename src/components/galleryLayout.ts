@@ -37,7 +37,10 @@ function randInt(min: number, max: number) {
  * Photos are grouped into rows with varying counts (2~5 per row),
  * random vertical spacing, jittered positions, and varying card sizes.
  */
-export function generateScatterLayout(entries: ContentEntry[]): GalleryItem[] {
+export function generateScatterLayout(
+  entries: ContentEntry[],
+  galleryImages?: string[]
+): GalleryItem[] {
   if (entries.length === 0) return [];
 
   const items: GalleryItem[] = [];
@@ -47,19 +50,20 @@ export function generateScatterLayout(entries: ContentEntry[]): GalleryItem[] {
   // Keep cycling through entries if we need more slots (for infinite feel)
   const getEntry = (i: number) => entries[i % entries.length];
 
-  // Collect unique images from entries, then supplement with gallery/item{X}.jpg
+  // Collect unique images from entries, then supplement with the actual gallery pool
   const uniqueEntryImages = Array.from(
     new Set(entries.map((e) => e.image).filter((img): img is string => Boolean(img)))
   );
-  const GALLERY_POOL_SIZE = 9; // item1.jpg ~ item9.jpg
+  const defaultPool = galleryImages?.length
+    ? galleryImages
+    : Array.from({ length: 9 }, (_, i) => `/images/gallery/item${i + 1}.jpg`);
+  const poolSize = Math.max(uniqueEntryImages.length, defaultPool.length);
   const allImages: string[] =
-    uniqueEntryImages.length >= GALLERY_POOL_SIZE
+    uniqueEntryImages.length >= poolSize
       ? uniqueEntryImages
       : [
           ...uniqueEntryImages,
-          ...Array.from({ length: GALLERY_POOL_SIZE }, (_, i) => `/images/gallery/item${i + 1}.jpg`).filter(
-            (img) => !uniqueEntryImages.includes(img)
-          ),
+          ...defaultPool.filter((img) => !uniqueEntryImages.includes(img)),
         ];
 
   // Generate enough rows to fill ~3 viewport heights worth of content
