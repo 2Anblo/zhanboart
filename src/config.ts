@@ -42,75 +42,40 @@ export const navigationConfig: NavigationConfig = {
   ],
 }
 
-// --- Hero Room Gallery ---
-
-export interface RoomConfig {
-  name: string
-  className: string
-  theme: "light" | "dark"
-  images: {
-    back: string[]
-    left: string[]
-    right: string[]
-  }
-}
+// --- Homepage Hero ---
 
 export interface HeroConfig {
-  mainTitle: string
-  rooms: RoomConfig[]
-  metaLines: string[]
+  line: string
+  ariaLabel: string
+  posterSrc: string
+  posterSrcLight?: string
+  videoSrc?: string
+  videoSrcLight?: string
+  objectPosition: string
 }
 
 export const heroConfig: HeroConfig = {
-  mainTitle: "zhanbo.art",
-  rooms: [
-    {
-      name: "深夜写作",
-      className: "room--waves",
-      theme: "dark",
-      images: {
-        back: ["/images/rooms/room1-back.jpg"],
-        left: ["/images/rooms/room1-left.jpg"],
-        right: ["/images/rooms/room1-right.jpg"],
-      },
-    },
-    {
-      name: "安静阅读",
-      className: "room--monk",
-      theme: "light",
-      images: {
-        back: ["/images/rooms/room2-back.jpg"],
-        left: ["/images/rooms/room2-left.jpg"],
-        right: ["/images/rooms/room2-right.jpg"],
-      },
-    },
-    {
-      name: "记忆深处",
-      className: "room--lighthouse",
-      theme: "dark",
-      images: {
-        back: ["/images/rooms/room3-back.jpg"],
-        left: ["/images/rooms/room3-left.jpg"],
-        right: ["/images/rooms/room3-right.jpg"],
-      },
-    },
-    {
-      name: "白日梦",
-      className: "room--orlando",
-      theme: "light",
-      images: {
-        back: ["/images/rooms/room4-back.jpg"],
-        left: ["/images/rooms/room4-left.jpg"],
-        right: ["/images/rooms/room4-right.jpg"],
-      },
-    },
-  ],
-  metaLines: [
-    "一个私人博客",
-    "碎片 · 光线 · 记忆",
-    "上海 — 2026",
-  ],
+  line: "屏幕亮着，房间没有开灯。",
+  ariaLabel: "夜晚房间中的私人片段",
+  posterSrc: "/images/hero/night-window.jpg",
+  objectPosition: "57% center",
 }
+
+// --- Homepage Memory Strip ---
+
+export type MemoryFragment =
+  | { kind: "image"; src: string; alt: string; className: string }
+  | { kind: "text"; eyebrow: string; text: string; className: string }
+  | { kind: "trace"; label: string; value: string; className: string }
+
+export const memoryStripConfig: MemoryFragment[] = [
+  { kind: "image", src: "/images/gallery/item3.jpg", alt: "一束落在墙上的光", className: "memory-fragment--image-a" },
+  { kind: "text", eyebrow: "23:48 / ROOM", text: "有些夜晚只是坐着，也足够接近自己。", className: "memory-fragment--text-a" },
+  { kind: "trace", label: "LISTENING", value: "SELF CONTROL / 00:41:12", className: "memory-fragment--trace-a" },
+  { kind: "image", src: "/images/gallery/item8.jpg", alt: "夜里的模糊影像", className: "memory-fragment--image-b" },
+  { kind: "text", eyebrow: "MEMORY / 07.15", text: "光从窗帘的缝隙里，留下很慢的灰尘。", className: "memory-fragment--text-b" },
+  { kind: "image", src: "/images/gallery/item1.jpg", alt: "被屏幕照亮的片段", className: "memory-fragment--image-c" },
+]
 
 // --- Particle Sculpture (Journal Section) ---
 

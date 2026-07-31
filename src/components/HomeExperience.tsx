@@ -1,32 +1,21 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useLenis } from "@/hooks/useLenis";
 import Navigation from "@/components/Navigation";
-import HeroRoomGallery from "@/sections/HeroRoomGallery";
-import ParticleSculpture from "@/sections/ParticleSculpture";
-import LighthouseVideo from "@/sections/LighthouseVideo";
-import MusicSection from "@/sections/MusicSection";
-import FooterTicker from "@/sections/FooterTicker";
 import OpeningAnimation from "@/components/OpeningAnimation";
-import type { ContentEntry } from "@/lib/content";
+import SilentHero from "@/sections/SilentHero";
+import MemoryStrip from "@/sections/MemoryStrip";
+import HomeAfterglow from "@/sections/HomeAfterglow";
 
-type HomeEntry = Omit<ContentEntry, "content">;
-
-export default function HomeExperience({
-  recentEntries,
-  musicEntries,
-}: {
-  recentEntries: HomeEntry[];
-  musicEntries: ContentEntry[];
-}) {
+export default function HomeExperience() {
   const [openingDone, setOpeningDone] = useState(false);
   useLenis();
 
   const handleOpeningComplete = useCallback(() => setOpeningDone(true), []);
 
   return (
-    <div className="relative">
+    <div className="home-experience">
       <OpeningAnimation onComplete={handleOpeningComplete} />
       <div
         style={{
@@ -36,14 +25,12 @@ export default function HomeExperience({
           transformOrigin: "center top",
         }}
       >
-        <Navigation />
+        <Navigation variant="home" />
         <main>
-          <HeroRoomGallery entries={recentEntries} />
-          <ParticleSculpture />
-          <LighthouseVideo />
-          <MusicSection entries={musicEntries} />
+          <SilentHero />
+          <MemoryStrip />
+          <HomeAfterglow />
         </main>
-        <FooterTicker />
       </div>
     </div>
   );

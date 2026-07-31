@@ -7,11 +7,12 @@ import { siteConfig, navigationConfig } from '../config';
 import ThemeToggle from '@/components/ThemeToggle';
 import { useTheme } from '@/components/ThemeProvider';
 
-export default function Navigation() {
+export default function Navigation({ variant = "default" }: { variant?: "default" | "home" }) {
   const navRef = useRef<HTMLElement>(null);
   const logoRef = useRef<HTMLAnchorElement>(null);
   const { theme } = useTheme();
   const isLight = theme === 'light';
+  const isHome = variant === "home";
 
   useEffect(() => {
     const logo = logoRef.current;
@@ -36,6 +37,19 @@ export default function Navigation() {
     return () => logo.removeEventListener('mouseenter', handleMouseEnter);
   }, []);
 
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav || !isHome) return;
+
+    const updateVisibility = () => {
+      nav.classList.toggle("is-revealed", window.scrollY > 12);
+    };
+
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    return () => window.removeEventListener("scroll", updateVisibility);
+  }, [isHome]);
+
   const scrollToTop = (e: React.MouseEvent) => {
     e.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -47,6 +61,21 @@ export default function Navigation() {
   const borderColor = isLight ? 'rgba(42,41,38,0.25)' : 'rgba(255,255,255,0.3)';
   const borderHover = '#f25b29';
   const textShadow = isLight ? 'none' : '0 2px 8px rgba(0,0,0,0.5)';
+
+  if (isHome) {
+    return (
+      <nav ref={navRef} className="home-navigation" aria-label="站点控制">
+        <div className="home-navigation__actions">
+          <ThemeToggle variant="minimal" />
+          {navigationConfig.menuLabel ? (
+            <Link href="/menu" className="home-navigation__menu">
+              {navigationConfig.menuLabel}
+            </Link>
+          ) : null}
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav

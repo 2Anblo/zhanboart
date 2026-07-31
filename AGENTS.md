@@ -148,6 +148,17 @@ visibility: "public"   # public | unlisted | draft
 - 或检查当前目录是否存在 `.git/` 子目录
 - 如果不在根目录，先 `cd` 到根目录再执行 git 命令
 
+### Spec 分支开发
+
+**每个 spec 的开发都必须新建独立分支进行，验收完毕后才能合并回主分支。**
+
+标准要求：
+- 开始实现任何 spec 前，先从主分支新建描述性分支，例如 `spec/home-redesign`、`feature/memory-strip`
+- spec 文档、实现代码、验证修复都提交到该分支
+- 未经用户验收，不得合并回 `master` / `main`
+- 验收前仍需遵守本文件的 lint、build、commit、push 要求
+- 如果当前修改属于某个 spec，但还在主分支上，必须先创建并切换到 spec 分支再继续
+
 ### 每次修改必须 commit + push
 
 **每次完成任何文件修改后，必须立即 commit 并 push 到远程仓库。**

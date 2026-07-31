@@ -2,18 +2,19 @@
 
 import { useTheme } from "@/components/ThemeProvider";
 
-export default function ThemeToggle() {
+export default function ThemeToggle({ variant = "default" }: { variant?: "default" | "minimal" }) {
   const { theme, toggleTheme } = useTheme();
   const isLight = theme === "light";
+  const isMinimal = variant === "minimal";
 
   return (
     <button
       onClick={toggleTheme}
       aria-label={isLight ? "切换到深色模式" : "切换到浅色模式"}
-      className="theme-toggle"
+      className={`theme-toggle${isMinimal ? " theme-toggle--minimal" : ""}`}
       style={{
         background: "transparent",
-        border: "1px solid rgba(255,255,255,0.3)",
+        border: isMinimal ? 0 : "1px solid rgba(255,255,255,0.3)",
         borderRadius: "50%",
         width: "36px",
         height: "36px",
@@ -27,12 +28,16 @@ export default function ThemeToggle() {
         borderColor: isLight ? "rgba(42,41,38,0.25)" : "rgba(255,255,255,0.3)",
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.borderColor = "#f25b29";
+        if (!isMinimal) {
+          (e.currentTarget as HTMLButtonElement).style.borderColor = "#f25b29";
+        }
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.borderColor = isLight
-          ? "rgba(42,41,38,0.25)"
-          : "rgba(255,255,255,0.3)";
+        if (!isMinimal) {
+          (e.currentTarget as HTMLButtonElement).style.borderColor = isLight
+            ? "rgba(42,41,38,0.25)"
+            : "rgba(255,255,255,0.3)";
+        }
       }}
     >
       {isLight ? (
