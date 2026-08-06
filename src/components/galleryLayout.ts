@@ -6,7 +6,7 @@ export interface GalleryItem {
   title: string;
   year: string;
   caption?: string;
-  slug: string;
+  slug?: string;
   baseX: number;
   baseY: number;
   width: number;
@@ -41,36 +41,25 @@ export function generateScatterLayout(
   entries: ContentEntry[],
   galleryImages?: string[]
 ): GalleryItem[] {
-  if (entries.length === 0) return [];
+  const entriesWithImages = entries.filter(
+    (entry): entry is ContentEntry & { image: string } => Boolean(entry.image)
+  );
+  const entryImages = new Set(entriesWithImages.map((entry) => entry.image));
+  const sources = [
+    ...entriesWithImages.map((entry) => ({ image: entry.image, entry })),
+    ...(galleryImages ?? [])
+      .filter((image) => !entryImages.has(image))
+      .map((image) => ({ image, entry: undefined })),
+  ];
+
+  if (sources.length === 0) return [];
 
   const items: GalleryItem[] = [];
   let currentY = 80;
-  let entryIndex = 0;
+  let sourceIndex = 0;
 
-  // Keep cycling through entries if we need more slots (for infinite feel)
-  const getEntry = (i: number) => entries[i % entries.length];
-
-  // Collect unique images from entries, then supplement with the actual gallery pool
-  const uniqueEntryImages = Array.from(
-    new Set(entries.map((e) => e.image).filter((img): img is string => Boolean(img)))
-  );
-  const defaultPool = galleryImages?.length
-    ? galleryImages
-    : Array.from({ length: 9 }, (_, i) => `/images/gallery/item${i + 1}.jpg`);
-  const poolSize = Math.max(uniqueEntryImages.length, defaultPool.length);
-  const allImages: string[] =
-    uniqueEntryImages.length >= poolSize
-      ? uniqueEntryImages
-      : [
-          ...uniqueEntryImages,
-          ...defaultPool.filter((img) => !uniqueEntryImages.includes(img)),
-        ];
-
-  // Generate enough rows to fill ~3 viewport heights worth of content
-  const targetRows = Math.max(4, Math.ceil(entries.length * 0.6));
-
-  for (let row = 0; row < targetRows && entryIndex < Math.max(entries.length, 12); row++) {
-    const photosInRow = randInt(2, 5);
+  while (sourceIndex < sources.length) {
+    const photosInRow = Math.min(randInt(2, 5), sources.length - sourceIndex);
     const rowHeight = rand(ROW_HEIGHT_MIN, ROW_HEIGHT_MAX);
     const totalGap = rand(GAP_X_MIN * (photosInRow - 1), GAP_X_MAX * (photosInRow - 1));
     const usableWidth = CANVAS_W - totalGap - 120; // 60px padding each side
@@ -80,8 +69,9 @@ export function generateScatterLayout(
     const startX = rand(40, 200);
 
     for (let col = 0; col < photosInRow; col++) {
-      const entry = getEntry(entryIndex);
-      entryIndex++;
+      const source = sources[sourceIndex];
+      const entry = source.entry;
+      sourceIndex++;
 
       // Vary card size ±15%
       const sizeVar = rand(0.85, 1.15);
@@ -98,16 +88,17 @@ export function generateScatterLayout(
       const baseX = startX + col * (photoWidth + rand(GAP_X_MIN, GAP_X_MAX)) + jitterX;
       const baseY = currentY + jitterY;
 
-      // Distribute different images across cards
-      const image = allImages[(entryIndex - 1) % allImages.length];
+      const filename = decodeURIComponent(source.image.split("/").pop() ?? "photo")
+        .replace(/\.[^.]+$/, "")
+        .replace(/[-_]+/g, " ");
 
       items.push({
-        id: `${entry.slug}-${entryIndex}`,
-        image,
-        title: entry.title,
-        year: entry.date ? entry.date.slice(0, 4) : "",
-        caption: entry.caption || entry.excerpt,
-        slug: entry.slug,
+        id: entry?.slug ?? `media-${sourceIndex}-${filename}`,
+        image: source.image,
+        title: entry?.title ?? filename,
+        year: entry?.date ? entry.date.slice(0, 4) : "",
+        caption: entry?.caption || entry?.excerpt,
+        slug: entry?.slug,
         baseX: Math.round(baseX),
         baseY: Math.round(baseY),
         width,

@@ -334,9 +334,11 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
                   <h3 className="ig-back-title">{item.title}</h3>
                   {item.caption && <p className="ig-back-caption">{item.caption}</p>}
                   <div className="ig-back-divider" />
-                  <Link href={`/photos/${item.slug}`} className="ig-back-link">
-                    查看详情 →
-                  </Link>
+                  {item.slug && (
+                    <Link href={`/photos/${item.slug}`} className="ig-back-link">
+                      查看详情 →
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>
@@ -433,9 +435,11 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
                   )}
                   <div className="ig-back-footer">
                     <span className="ig-back-id">#{String(idx + 1).padStart(2, "0")}</span>
-                    <Link href={`/photos/${item.slug}`} className="ig-back-arrow" onClick={(e) => e.stopPropagation()}>
-                      查看 →
-                    </Link>
+                    {item.slug && (
+                      <Link href={`/photos/${item.slug}`} className="ig-back-arrow" onClick={(e) => e.stopPropagation()}>
+                        查看 →
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

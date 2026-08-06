@@ -62,6 +62,19 @@ TinaCMS admin:
 http://localhost:3000/admin
 ```
 
+### Photo workflow
+
+- Open **Media** in the admin to upload or delete photos. Files are stored in
+  `public/images/gallery/`, and the photo page reads this folder directly.
+- Uploading a photo makes it appear on the photo page after the next build.
+- Deleting a photo removes it from the photo page after the next build.
+- Create an item in **Photos** only when a photo needs a title, date, caption,
+  location, visibility setting, or detail page. Select the same image from the
+  media library in that item.
+- Deleting a **Photos** item removes its metadata/detail page but deliberately
+  keeps the underlying image. Delete the image from **Media** when it should
+  disappear from the gallery completely.
+
 ## Build
 
 ```bash

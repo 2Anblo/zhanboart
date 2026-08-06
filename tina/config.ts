@@ -76,8 +76,9 @@ export default defineConfig({
     publicFolder: "public",
   },
   media: {
+    accept: "image/*",
     tina: {
-      mediaRoot: "uploads",
+      mediaRoot: "images/gallery",
       publicFolder: "public",
     },
   },
@@ -108,6 +109,8 @@ export default defineConfig({
             type: "image",
             name: "image",
             label: "图片",
+            description: "从照片库选择图片；上传的新图片会直接保存到站点照片库。",
+            required: true,
           },
           {
             type: "string",
