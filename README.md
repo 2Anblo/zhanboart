@@ -100,7 +100,7 @@ CLOUDFLARE_R2_ACCESS_KEY_ID=
 CLOUDFLARE_R2_SECRET_ACCESS_KEY=
 CLOUDFLARE_R2_BUCKET=
 CLOUDFLARE_R2_PUBLIC_URL=https://media.example.com
-PHOTO_ADMIN_PORT=4173
+ADMIN_PORT=4173
 ```
 
 The R2 token needs **Object Read & Write** access scoped to the selected bucket.
@@ -121,8 +121,8 @@ CLOUDFLARE_R2_ACCESS_KEY_ID=
 CLOUDFLARE_R2_SECRET_ACCESS_KEY=
 CLOUDFLARE_R2_BUCKET=
 CLOUDFLARE_R2_PUBLIC_URL=https://media.example.com
-PHOTO_ADMIN_PASSWORD=
-PHOTO_ADMIN_SESSION_SECRET=
+ADMIN_PASSWORD=
+ADMIN_SESSION_SECRET=
 GITHUB_OWNER=2Anblo
 GITHUB_REPO=zhanboart
 GITHUB_TOKEN=
@@ -130,7 +130,7 @@ GITHUB_BRANCH=master
 GITHUB_CONTENT_PATH=content/photos
 ```
 
-`PHOTO_ADMIN_SESSION_SECRET` should be a long random value. The GitHub token needs
+`ADMIN_SESSION_SECRET` should be a long random value. The GitHub token needs
 permission to read and write contents in this repository. The R2 token needs **Object
 Read & Write** access scoped to the selected bucket.
 
