@@ -167,7 +167,10 @@ export default function OnlinePhotoAdmin() {
   }
 
   async function handleDelete(photo: PhotoRecord) {
-    if (!photo.managed || !window.confirm(`确认删除「${photo.title}」？这会同时删除 R2 图片和 GitHub 记录。`)) return;
+    const warning = photo.managed
+      ? `确认删除「${photo.title}」？这会同时删除 R2 图片和 GitHub 记录。`
+      : `确认删除「${photo.title}」？这只会删除 GitHub 中的旧记录，不会删除站点资源。`;
+    if (!window.confirm(warning)) return;
     setError("");
     setMessage("");
     setLoading(true);
@@ -303,7 +306,7 @@ export default function OnlinePhotoAdmin() {
                 <article className="photo-card" key={photo.slug}>
                   <div className="photo-image-wrap"><img src={photo.image} alt={photo.title} /></div>
                   <div className="photo-meta"><time>{photo.date}</time><h3>{photo.title}</h3><p>{photo.caption || "没有留下说明"}</p>{photo.location ? <small>{photo.location}</small> : null}</div>
-                  <button type="button" className="delete-button" disabled={loading || !photo.managed} onClick={() => handleDelete(photo)}>{photo.managed ? "删除" : "本地旧记录"}</button>
+                  <button type="button" className="delete-button" disabled={loading} onClick={() => handleDelete(photo)}>{photo.managed ? "删除" : "删除旧记录"}</button>
                 </article>
               ))}
             </div>
