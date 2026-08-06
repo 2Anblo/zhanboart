@@ -28,13 +28,24 @@ export type OnlinePhoto = {
   managed: boolean;
 };
 
+export type OnlineAsset = {
+  name: string;
+  path: string;
+  url: string;
+  size: number;
+};
+
 type GitHubFile = {
   name: string;
   path: string;
   sha: string;
   type: string;
+  size?: number;
   content?: string;
 };
+
+const SITE_ASSET_EXTENSIONS = new Set([".avif", ".gif", ".jpeg", ".jpg", ".png", ".svg", ".webp"]);
+const SITE_ASSET_FOLDERS = new Set(["gallery", "hero", "rooms", "uploads"]);
 
 function requiredEnv(name: string): string {
   const value = process.env[name]?.trim();
@@ -183,6 +194,32 @@ async function readGitHubFile(filePath: string): Promise<GitHubFile> {
   return githubRequest<GitHubFile>(`${githubUrl(filePath)}?ref=${encodeURIComponent(config.branch)}`);
 }
 
+async function listGitHubDirectory(directoryPath: string): Promise<GitHubFile[]> {
+  const config = getGitHubConfig();
+  const entries = await githubRequest<GitHubFile[]>(`${githubUrl(directoryPath)}?ref=${encodeURIComponent(config.branch)}`);
+  const files = entries.filter((entry) => entry.type === "file");
+  const directories = entries.filter((entry) => entry.type === "dir");
+  const nested = await Promise.all(directories.map((directory) => listGitHubDirectory(directory.path)));
+  return files.concat(nested.flat());
+}
+
+function isSiteImage(assetPath: string): boolean {
+  return assetPath.startsWith("public/images/") && SITE_ASSET_EXTENSIONS.has(assetPath.slice(assetPath.lastIndexOf(".")).toLowerCase());
+}
+
+export async function listSiteAssets(): Promise<OnlineAsset[]> {
+  const files = await listGitHubDirectory("public/images");
+  return files
+    .filter((file) => isSiteImage(file.path))
+    .map((file) => ({
+      name: file.name,
+      path: file.path,
+      url: `/${file.path.slice("public/".length)}`,
+      size: file.size || 0,
+    }))
+    .sort((a, b) => a.path.localeCompare(b.path));
+}
+
 function decodeGitHubContent(content: string | undefined): string {
   return Buffer.from(String(content || "").replace(/\s/g, ""), "base64").toString("utf8");
 }
@@ -300,7 +337,6 @@ export async function deleteRemotePhoto(slug: string): Promise<void> {
   const photo = photoFromMarkdown(decodeGitHubContent(file.content), file.name);
   if (!photo.r2Key) throw new Error("这是一张旧的本地照片，不能从线上 R2 后台删除");
 
-  await config.client.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: photo.r2Key }));
   try {
     await githubRequest(githubUrl(filePath), {
       method: "DELETE",
@@ -308,8 +344,55 @@ export async function deleteRemotePhoto(slug: string): Promise<void> {
       body: JSON.stringify({ message: `Delete photo: ${photo.title}`, sha: file.sha, branch: github.branch }),
     });
   } catch (error) {
-    throw new Error(`R2 已删除，但 GitHub Markdown 删除失败，请重试或手动删除 ${filePath}：${String(error)}`);
+    throw new Error(`GitHub Markdown 删除失败，R2 图片未删除，请重试 ${filePath}：${String(error)}`);
   }
+
+  try {
+    await config.client.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: photo.r2Key }));
+  } catch (error) {
+    throw new Error(`GitHub Markdown 已删除，但 R2 图片删除失败，请在 R2 手动删除 ${photo.r2Key}：${String(error)}`);
+  }
+}
+
+export async function createSiteAsset(form: FormData): Promise<OnlineAsset> {
+  const github = getGitHubConfig();
+  const file = form.get("file");
+  if (!(file instanceof File) || file.size === 0) throw new Error("请选择一张资源图片");
+  if (!IMAGE_TYPES.has(file.type) && file.type !== "image/svg+xml") throw new Error("仅支持 JPG、PNG、WebP、GIF、AVIF 和 SVG 图片");
+  if (file.size > MAX_UPLOAD_BYTES) throw new Error("图片不能超过 30 MB");
+
+  const requestedFolder = String(form.get("folder") || "uploads");
+  const folder = SITE_ASSET_FOLDERS.has(requestedFolder) ? requestedFolder : "uploads";
+  const extension = extensionFor(file.name, file.type);
+  const baseName = slugify(file.name.replace(/\.[^.]+$/, ""), "asset");
+  const existing = new Set((await listSiteAssets()).map((asset) => asset.path));
+  let filePath = `public/images/${folder}/${baseName}.${extension}`;
+  let suffix = 2;
+  while (existing.has(filePath)) filePath = `public/images/${folder}/${baseName}-${suffix++}.${extension}`;
+
+  await githubRequest(githubUrl(filePath), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message: `Add site asset: ${file.name}`,
+      content: Buffer.from(await file.arrayBuffer()).toString("base64"),
+      branch: github.branch,
+    }),
+  });
+
+  return { name: filePath.split("/").pop() || filePath, path: filePath, url: `/${filePath.slice("public/".length)}`, size: file.size };
+}
+
+export async function deleteSiteAsset(assetPath: string): Promise<void> {
+  const normalizedPath = assetPath.replace(/^\/+/, "");
+  if (!isSiteImage(normalizedPath) || normalizedPath.includes("..")) throw new Error("资源路径无效");
+  const github = getGitHubConfig();
+  const file = await readGitHubFile(normalizedPath);
+  await githubRequest(githubUrl(normalizedPath), {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message: `Delete site asset: ${file.name}`, sha: file.sha, branch: github.branch }),
+  });
 }
 
 export async function checkRemoteConfig(): Promise<{ configured: boolean; connected: boolean; error?: string }> {

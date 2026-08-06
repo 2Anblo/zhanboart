@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useTheme } from "@/components/ThemeProvider";
 import type { ContentEntry } from "@/lib/content";
@@ -40,8 +40,8 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
   const { theme } = useTheme();
   const isLight = theme === "light";
 
-  const [items] = useState<GalleryItem[]>(() => generateScatterLayout(entries, galleryImages));
-  const [canvasH] = useState(() => getScatterLayoutHeight(items));
+  const [items, setItems] = useState<GalleryItem[]>(() => generateScatterLayout(entries, galleryImages));
+  const canvasH = useMemo(() => getScatterLayoutHeight(items), [items]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -75,6 +75,23 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
     const first = items[0];
     return first ? { id: first.id, year: first.year } : { id: "", year: "" };
   });
+
+  const handleImageLoad = useCallback((id: string, event: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = event.currentTarget;
+    if (!naturalWidth || !naturalHeight) return;
+
+    setItems((current) => {
+      let changed = false;
+      const next = current.map((item) => {
+        if (item.id !== id) return item;
+        const width = Math.round(item.height * (naturalWidth / naturalHeight));
+        if (item.width === width) return item;
+        changed = true;
+        return { ...item, width };
+      });
+      return changed ? next : current;
+    });
+  }, []);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768);
@@ -322,11 +339,12 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
             <div
               key={item.id}
               className={`ig-mob-card ${mobileFlipped === item.id ? "flipped" : ""}`}
+              style={{ "--card-ratio": `${item.width} / ${item.height}` } as CSSProperties}
               onClick={() => setMobileFlipped((p) => (p === item.id ? null : item.id))}
             >
               <div className="ig-mob-card-inner">
                 <div className="ig-mob-front">
-                  <img src={item.image} alt={item.title} draggable={false} loading="lazy" decoding="async" />
+                  <img src={item.image} alt={item.title} draggable={false} loading="lazy" decoding="async" onLoad={(event) => handleImageLoad(item.id, event)} />
                 </div>
                 <div className="ig-mob-back">
                   <span className="ig-back-year">{item.year}</span>
@@ -419,7 +437,7 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
               style={{ width: item.width, height: item.height }}
             >
               <div className="ig-card-face ig-front">
-                <img src={item.image} alt={item.title} className="ig-card-img" loading="lazy" draggable={false} />
+                <img src={item.image} alt={item.title} className="ig-card-img" loading="lazy" draggable={false} onLoad={(event) => handleImageLoad(item.id, event)} />
                 <div className="ig-card-grain" />
               </div>
               <div className="ig-card-face ig-back">

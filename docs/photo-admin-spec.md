@@ -30,7 +30,8 @@ The online tool changes both together. Existing images committed under
 
 1. Select **删除** on an R2-managed photo.
 2. Confirm the irreversible action.
-3. The server deletes the R2 object, then removes the Markdown record through GitHub.
+3. The server removes the Markdown record through GitHub first, then deletes the R2 object.
+   This keeps the old public page's image available while Vercel is rebuilding.
 4. Vercel deploys the updated public site.
 
 ## Storage and deployment
@@ -50,3 +51,11 @@ The online tool changes both together. Existing images committed under
 - R2 deletion is irreversible and always requires an explicit browser confirm.
 - The online API never returns credentials to the browser.
 - The local `npm run photo-admin` tool remains available as a fallback.
+
+## Site image resources
+
+The online admin also manages image files already committed under `public/images/`.
+It recursively lists `gallery`, `hero`, `rooms`, and other image folders, and can
+upload new assets into those folders or delete an existing asset through the GitHub
+Contents API. Resource deletion shows an explicit warning because these files may
+be referenced by the homepage, room gallery, music, or photo pages.
