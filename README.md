@@ -2,7 +2,8 @@
 
 Personal site for private writing, notes, photos, light, night, music, and memory.
 
-The site uses Next.js App Router with static export and Markdown content from `content/`.
+The site uses Next.js App Router with Markdown content from `content/`. The public
+site runs on Vercel, and the photo admin is available online at `/admin`.
 
 ## Stack
 
@@ -10,7 +11,8 @@ The site uses Next.js App Router with static export and Markdown content from `c
 - React 19 + TypeScript
 - Tailwind CSS
 - Markdown content with `gray-matter`
-- Local R2 photo admin
+- Vercel online photo admin
+- Local R2 photo admin fallback
 
 ## Content
 
@@ -63,15 +65,20 @@ npm run photo-admin
 http://127.0.0.1:4173
 ```
 
+Online photo admin:
+
+```text
+https://your-domain.example/admin
+```
+
 ### Photo workflow
 
-- The admin binds to `127.0.0.1` and is never deployed with the public site.
-- Uploads are sent from the local server to Cloudflare R2 using S3 credentials.
-- Each upload creates a matching Markdown file in `content/photos/`.
+- The online admin is protected by a password stored only in Vercel environment variables.
+- Uploads are sent server-side to Cloudflare R2 using S3 credentials.
+- Each upload commits a matching Markdown file to GitHub, which triggers a Vercel deployment.
 - Deleting an R2-managed photo removes both the object and its Markdown file.
-- Existing repository images are shown as read-only and are not deleted by the
-  R2 admin.
-- Commit and push the generated Markdown after editing to publish the change.
+- Existing repository images without an `r2Key` are shown as read-only.
+- The local tool remains available when you want to work without sending admin traffic online.
 
 ## Build
 
@@ -80,7 +87,8 @@ npm run lint
 npm run build
 ```
 
-`npm run build` produces the static site in `out/`.
+Vercel runs the Next.js server build. Public pages remain pre-rendered where possible,
+while `/admin` and `/api/admin/*` run as Node.js server functions.
 
 ## Local R2 photo admin
 
@@ -99,16 +107,32 @@ The R2 token needs **Object Read & Write** access scoped to the selected bucket.
 `CLOUDFLARE_R2_PUBLIC_URL` should be a custom domain connected to the bucket for
 production. An `r2.dev` URL can be used temporarily for testing.
 
-Start the tool with `npm run photo-admin`. Credentials stay server-side and are
-never returned by its status endpoint.
+Start the local fallback with `npm run photo-admin`. Credentials stay server-side and
+are never returned by its status endpoint.
 
 ## Deployment
 
-The project is configured for static export in `next.config.ts`:
+Connect the repository to Vercel and add these environment variables for Production
+and Preview as needed:
 
-```ts
-output: "export"
+```dotenv
+CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_R2_ACCESS_KEY_ID=
+CLOUDFLARE_R2_SECRET_ACCESS_KEY=
+CLOUDFLARE_R2_BUCKET=
+CLOUDFLARE_R2_PUBLIC_URL=https://media.example.com
+PHOTO_ADMIN_PASSWORD=
+PHOTO_ADMIN_SESSION_SECRET=
+GITHUB_OWNER=2Anblo
+GITHUB_REPO=zhanboart
+GITHUB_TOKEN=
+GITHUB_BRANCH=master
+GITHUB_CONTENT_PATH=content/photos
 ```
+
+`PHOTO_ADMIN_SESSION_SECRET` should be a long random value. The GitHub token needs
+permission to read and write contents in this repository. The R2 token needs **Object
+Read & Write** access scoped to the selected bucket.
 
 Vercel can deploy it with the default build command:
 
