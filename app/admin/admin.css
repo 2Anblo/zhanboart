@@ -51,7 +51,7 @@
 .form-error { color: #efaaa1; }
 .photo-form { display: grid; gap: 1.4rem; }
 .drop-zone { display: grid; min-height: 170px; place-content: center; justify-items: center; gap: .7rem; border: 1px dashed rgba(232, 229, 220, .3); background: linear-gradient(135deg, rgba(255,255,255,.025), transparent); cursor: pointer; text-align: center; transition: border-color 180ms ease, background 180ms ease; }
-.drop-zone:hover, .drop-zone:focus-within { border-color: var(--admin-red); background: rgba(217, 85, 69, .06); }
+.drop-zone:hover, .drop-zone:focus-within, .drop-zone.is-dragging { border-color: var(--admin-red); background: rgba(217, 85, 69, .12); }
 .drop-zone input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .drop-symbol { color: var(--admin-red); font-size: 2.5rem; font-weight: 200; line-height: .7; }
 .drop-zone strong { color: var(--admin-paper); font-size: .82rem; font-weight: 500; }
