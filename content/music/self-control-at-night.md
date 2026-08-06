@@ -7,7 +7,7 @@ tags: ["music", "frank-ocean", "night"]
 mood: "melancholy"
 location: "Shanghai"
 audio: "/music/self-control.mp3"
-albumArt: "/images/gallery/item5.jpg"
+albumArt: "/images/rooms/room2-left.jpg"
 artist: "Frank Ocean"
 visibility: "public"
 ---
