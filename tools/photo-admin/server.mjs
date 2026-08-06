@@ -28,7 +28,7 @@ const contentDir = path.join(projectRoot, "content", "photos");
 const publicImagesDir = path.join(projectRoot, "public", "images");
 const uiDir = path.join(__dirname, "ui");
 const host = "127.0.0.1";
-const port = Number.parseInt(process.env.PHOTO_ADMIN_PORT || "4173", 10);
+const port = Number.parseInt(process.env.ADMIN_PORT || "4173", 10);
 const maxUploadBytes = 30 * 1024 * 1024;
 
 const staticFiles = new Map([

@@ -43,7 +43,7 @@ function requiredEnv(name: string): string {
 }
 
 function getSessionSecret(): string {
-  return requiredEnv("PHOTO_ADMIN_SESSION_SECRET");
+  return requiredEnv("ADMIN_SESSION_SECRET");
 }
 
 function encode(value: string): string {
@@ -59,7 +59,7 @@ function sessionSignature(payload: string): string {
 }
 
 export function verifyAdminPassword(password: string): boolean {
-  const expected = process.env.PHOTO_ADMIN_PASSWORD?.trim();
+  const expected = process.env.ADMIN_PASSWORD?.trim();
   if (!expected || !password) return false;
   const expectedHash = createHmac("sha256", getSessionSecret()).update(expected).digest();
   const actualHash = createHmac("sha256", getSessionSecret()).update(password).digest();
