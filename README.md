@@ -78,6 +78,8 @@ https://your-domain.example/admin
 - Uploads are sent server-side to Cloudflare R2 using S3 credentials.
 - Each upload commits a matching Markdown file to GitHub, which triggers a Vercel deployment.
 - Deleting an R2-managed photo removes both the object and its Markdown file.
+- The admin also lists and manages image resources under `public/images` (gallery, hero, rooms, and uploads).
+- Site resource uploads are committed to GitHub and become public after the Vercel deployment completes.
 - Existing repository images without an `r2Key` are shown as read-only.
 - The local tool remains available when you want to work without sending admin traffic online.
 

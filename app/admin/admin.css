@@ -78,10 +78,29 @@
 .delete-button { position: absolute; right: 0; bottom: 1.5rem; }
 .delete-button:disabled { cursor: not-allowed; opacity: .4; }
 .empty-state { color: var(--admin-muted); font-size: .82rem; }
+.asset-library { margin-top: 5rem; padding-top: 2.5rem; border-top: 1px solid var(--admin-line); }
+.asset-library-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-bottom: .8rem; }
+.asset-library-heading h2 { margin: 0; color: var(--admin-paper); font-family: var(--font-serif), Georgia, serif; font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 400; line-height: .9; }
+.asset-library-heading > span { color: var(--admin-muted); font: .64rem/1 var(--font-mono), monospace; }
+.asset-note { max-width: 36rem; margin: 0 0 1.25rem; color: var(--admin-muted); font-size: .72rem; line-height: 1.7; }
+.asset-upload { display: grid; grid-template-columns: 1fr auto auto; gap: .7rem; align-items: center; margin-bottom: 1.4rem; }
+.asset-upload input[type="file"] { min-width: 0; color: var(--admin-muted); font-size: .68rem; }
+.asset-upload input[type="file"]::file-selector-button { margin-right: .6rem; border: 1px solid var(--admin-line); background: transparent; color: var(--admin-paper); padding: .55rem .7rem; cursor: pointer; font-size: .68rem; }
+.asset-upload select { border: 1px solid var(--admin-line); background: var(--admin-panel); color: var(--admin-paper); padding: .55rem .7rem; font-size: .68rem; }
+.asset-upload button { border: 1px solid var(--admin-red); background: transparent; color: var(--admin-paper); padding: .55rem .8rem; cursor: pointer; font-size: .68rem; }
+.asset-upload button:hover { background: var(--admin-red); color: #160f0d; }
+.asset-upload button:disabled { cursor: not-allowed; opacity: .4; }
+.asset-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; }
+.asset-card { min-width: 0; border: 1px solid var(--admin-line); background: rgba(0, 0, 0, .16); }
+.asset-card img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; background: #0c0d0c; }
+.asset-card > div { display: flex; align-items: center; justify-content: space-between; gap: .4rem; padding: .55rem; }
+.asset-card code { min-width: 0; overflow: hidden; color: var(--admin-muted); font: .58rem/1.3 var(--font-mono), monospace; text-overflow: ellipsis; white-space: nowrap; }
+.asset-card .delete-button { position: static; flex: none; }
 @media (max-width: 900px) {
   .admin-grid { grid-template-columns: 1fr; }
   .upload-panel { border-right: 0; border-bottom: 1px solid var(--admin-line); }
   .contact-sheet { min-height: auto; }
+  .asset-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
   .admin-header { align-items: flex-start; flex-direction: column; gap: .9rem; padding-top: 1.2rem; padding-bottom: 1.2rem; }
@@ -89,4 +108,6 @@
   .form-fields, .photo-card { grid-template-columns: 1fr; }
   .photo-meta { padding-bottom: 2rem; }
   .delete-button { right: auto; left: 0; bottom: 0; }
+  .asset-upload { grid-template-columns: 1fr; }
+  .asset-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

@@ -19,6 +19,13 @@ type PhotoRecord = {
   managed: boolean;
 };
 
+type AssetRecord = {
+  name: string;
+  path: string;
+  url: string;
+  size: number;
+};
+
 type Connection = { configured: boolean; connected: boolean; error?: string };
 
 const emptyConnection: Connection = { configured: false, connected: false };
@@ -27,6 +34,7 @@ export default function OnlinePhotoAdmin() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [password, setPassword] = useState("");
   const [photos, setPhotos] = useState<PhotoRecord[]>([]);
+  const [assets, setAssets] = useState<AssetRecord[]>([]);
   const [connection, setConnection] = useState<Connection>(emptyConnection);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -80,14 +88,20 @@ export default function OnlinePhotoAdmin() {
   }
 
   async function loadPhotos() {
-    const response = await fetch("/api/admin/photos", { cache: "no-store" });
+    const [response, assetsResponse] = await Promise.all([
+      fetch("/api/admin/photos", { cache: "no-store" }),
+      fetch("/api/admin/assets", { cache: "no-store" }),
+    ]);
     const data = (await response.json()) as { photos?: PhotoRecord[]; connection?: Connection; error?: string };
-    if (response.status === 401) {
+    const assetsData = (await assetsResponse.json()) as { assets?: AssetRecord[]; error?: string };
+    if (response.status === 401 || assetsResponse.status === 401) {
       setAuthenticated(false);
       return;
     }
     if (!response.ok) throw new Error(data.error || "读取照片失败");
+    if (!assetsResponse.ok) throw new Error(assetsData.error || "读取站点资源失败");
     setPhotos(data.photos || []);
+    setAssets(assetsData.assets || []);
     setConnection(data.connection || emptyConnection);
   }
 
@@ -165,6 +179,45 @@ export default function OnlinePhotoAdmin() {
       await loadPhotos();
     } catch (deleteError) {
       setError(deleteError instanceof Error ? deleteError.message : "删除失败");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleAssetUpload(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    setError("");
+    setMessage("");
+    setLoading(true);
+    try {
+      const response = await fetch("/api/admin/assets", { method: "POST", body: new FormData(form) });
+      const data = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(data.error || "上传站点资源失败");
+      form.reset();
+      setMessage("资源已提交到 GitHub，Vercel 部署完成后会出现在公开网站。");
+      await loadPhotos();
+    } catch (uploadError) {
+      setError(uploadError instanceof Error ? uploadError.message : "上传站点资源失败");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleAssetDelete(asset: AssetRecord) {
+    if (!window.confirm(`确认删除站点资源「${asset.path}」？它可能正在被公开页面引用。`)) return;
+    setError("");
+    setMessage("");
+    setLoading(true);
+    try {
+      const encodedPath = asset.path.split("/").map(encodeURIComponent).join("/");
+      const response = await fetch(`/api/admin/assets/${encodedPath}`, { method: "DELETE" });
+      const data = (await response.json()) as { error?: string };
+      if (!response.ok) throw new Error(data.error || "删除站点资源失败");
+      setMessage("资源已删除，网站会在 Vercel 部署完成后更新。");
+      await loadPhotos();
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "删除站点资源失败");
     } finally {
       setLoading(false);
     }
@@ -255,6 +308,33 @@ export default function OnlinePhotoAdmin() {
               ))}
             </div>
           )}
+          <div className="asset-library">
+            <div className="asset-library-heading">
+              <div><p className="eyebrow">SITE ASSETS</p><h2>站点资源</h2></div>
+              <span>{String(assets.length).padStart(2, "0")} FILES</span>
+            </div>
+            <p className="asset-note">这里管理 `public/images` 下的图片。删除前请确认它没有被首页、房间或音乐页面引用。</p>
+            <form className="asset-upload" onSubmit={handleAssetUpload}>
+              <input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/svg+xml" required />
+              <select name="folder" defaultValue="uploads" aria-label="资源目录">
+                <option value="uploads">uploads / 新资源</option>
+                <option value="gallery">gallery / 照片画廊</option>
+                <option value="hero">hero / 首页</option>
+                <option value="rooms">rooms / 房间</option>
+              </select>
+              <button type="submit" disabled={loading || !connection.connected}>上传资源</button>
+            </form>
+            {assets.length === 0 ? <p className="empty-state">还没有找到站点资源。</p> : (
+              <div className="asset-grid">
+                {assets.map((asset) => (
+                  <article className="asset-card" key={asset.path}>
+                    <img src={asset.url} alt={asset.name} />
+                    <div><code>{asset.path.replace("public/images/", "")}</code><button type="button" className="delete-button" disabled={loading} onClick={() => handleAssetDelete(asset)}>删除</button></div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
         </section>
       </div>
     </main>

@@ -51,3 +51,11 @@ The online tool changes both together. Existing images committed under
 - R2 deletion is irreversible and always requires an explicit browser confirm.
 - The online API never returns credentials to the browser.
 - The local `npm run photo-admin` tool remains available as a fallback.
+
+## Site image resources
+
+The online admin also manages image files already committed under `public/images/`.
+It recursively lists `gallery`, `hero`, `rooms`, and other image folders, and can
+upload new assets into those folders or delete an existing asset through the GitHub
+Contents API. Resource deletion shows an explicit warning because these files may
+be referenced by the homepage, room gallery, music, or photo pages.
