@@ -17,7 +17,6 @@ build/
 coverage/
 public/admin/
 tina/__generated__/
-tina/tina-lock.json
 
 # Logs
 logs/
