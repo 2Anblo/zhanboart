@@ -74,11 +74,16 @@ https://your-domain.example/admin
 ### Photo workflow
 
 - The online admin is protected by a password stored only in Vercel environment variables.
+- The upload area supports both clicking to choose a file and dragging a JPG, PNG, WebP, GIF, or AVIF file into the drop zone (maximum 30 MB).
 - Uploads are sent server-side to Cloudflare R2 using S3 credentials.
 - Each upload commits a matching Markdown file to GitHub, which triggers a Vercel deployment.
 - Deleting an R2-managed photo removes both the object and its Markdown file.
 - Existing repository images without an `r2Key` are shown as read-only.
 - The local tool remains available when you want to work without sending admin traffic online.
+
+The `/admin` session is shared by future content modules. Photo management is the
+first module; journal, notes, music, and other resources can use the same admin
+entry point later without introducing another login system.
 
 ## Build
 
@@ -134,8 +139,19 @@ GITHUB_CONTENT_PATH=content/photos
 permission to read and write contents in this repository. The R2 token needs **Object
 Read & Write** access scoped to the selected bucket.
 
+In Vercel, enter the variable name and value in separate fields. After changing an
+environment variable, redeploy the project before testing `/admin`.
+
 Vercel can deploy it with the default build command:
 
 ```bash
+npm run build
+```
+
+The full local verification command is:
+
+```bash
+npm run lint
+npm run test:photo-admin
 npm run build
 ```

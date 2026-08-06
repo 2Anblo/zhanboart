@@ -132,14 +132,16 @@ export default function OnlinePhotoAdmin() {
 
   async function handleUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     setError("");
     setMessage("");
     setLoading(true);
     try {
-      const response = await fetch("/api/admin/photos", { method: "POST", body: new FormData(event.currentTarget) });
+      const response = await fetch("/api/admin/photos", { method: "POST", body: formData });
       const data = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(data.error || "上传失败");
-      event.currentTarget.reset();
+      form.reset();
       setSelectedFileName("");
       setMessage("已上传，GitHub 正在触发网站重新部署。");
       await loadPhotos();
