@@ -330,13 +330,10 @@ export async function createRemotePhoto(form: FormData): Promise<{ slug: string;
 }
 
 export async function deleteRemotePhoto(slug: string): Promise<void> {
-  const config = getR2Config();
   const github = getGitHubConfig();
   const filePath = `${github.contentPath}/${slug}.md`;
   const file = await readGitHubFile(filePath);
   const photo = photoFromMarkdown(decodeGitHubContent(file.content), file.name);
-  if (!photo.r2Key) throw new Error("这是一张旧的本地照片，不能从线上 R2 后台删除");
-
   try {
     await githubRequest(githubUrl(filePath), {
       method: "DELETE",
@@ -346,6 +343,10 @@ export async function deleteRemotePhoto(slug: string): Promise<void> {
   } catch (error) {
     throw new Error(`GitHub Markdown 删除失败，R2 图片未删除，请重试 ${filePath}：${String(error)}`);
   }
+
+  if (!photo.r2Key) return;
+
+  const config = getR2Config();
 
   try {
     await config.client.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: photo.r2Key }));
