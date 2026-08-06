@@ -12,11 +12,6 @@ const FRICTION = 0.93;
 const VELOCITY_THRESHOLD = 0.05;
 const PARALLAX_STRENGTH_X = 8;
 const PARALLAX_STRENGTH_Y = 5;
-const DEPTH_Z = 0.06;
-const ROTATE_Y_FACTOR = 0.004;
-const ROTATE_X_FACTOR = 0.003;
-const SCALE_MIN = 0.85;
-const SCALE_DIST_FACTOR = 0.0002;
 const OPACITY_MIN = 0.3;
 const OPACITY_DIST_FACTOR = 1000;
 const BLUR_MAX = 3;
@@ -76,8 +71,7 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
     return first ? { id: first.id, year: first.year } : { id: "", year: "" };
   });
 
-  const handleImageLoad = useCallback((id: string, event: React.SyntheticEvent<HTMLImageElement>) => {
-    const { naturalWidth, naturalHeight } = event.currentTarget;
+  const applyImageRatio = useCallback((id: string, naturalWidth: number, naturalHeight: number) => {
     if (!naturalWidth || !naturalHeight) return;
 
     setItems((current) => {
@@ -92,6 +86,19 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
       return changed ? next : current;
     });
   }, []);
+
+  const handleImageLoad = useCallback((id: string, event: React.SyntheticEvent<HTMLImageElement>) => {
+    applyImageRatio(id, event.currentTarget.naturalWidth, event.currentTarget.naturalHeight);
+  }, [applyImageRatio]);
+
+  useEffect(() => {
+    const images = document.querySelectorAll<HTMLImageElement>("[data-gallery-image]");
+    images.forEach((image) => {
+      if (!image.complete || !image.naturalWidth) return;
+      const id = image.dataset.galleryImageId;
+      if (id) applyImageRatio(id, image.naturalWidth, image.naturalHeight);
+    });
+  }, [applyImageRatio, isMobile, items.length]);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth <= 768);
@@ -171,14 +178,10 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
         }
 
         const isNearest = dist < NEAREST_DIST_THRESHOLD;
-        const z = -dist * DEPTH_Z;
-        const rotateY = dx * ROTATE_Y_FACTOR;
-        const rotateX = -dy * ROTATE_X_FACTOR;
-        const scale = isNearest ? 1.03 : Math.max(SCALE_MIN, 1 - dist * SCALE_DIST_FACTOR);
         const opacity = isNearest ? 1 : Math.min(1, Math.max(OPACITY_MIN, 1 - dist / OPACITY_DIST_FACTOR));
         const blur = isNearest ? 0 : Math.min(BLUR_MAX, dist / BLUR_DIST_FACTOR);
 
-        card.style.transform = `translate3d(${screenX}px, ${screenY}px, ${z}px) rotateY(${rotateY}deg) rotateX(${rotateX}deg) scale(${scale})`;
+        card.style.transform = `translate3d(${screenX}px, ${screenY}px, 0)`;
         card.style.opacity = String(opacity);
         card.style.filter = blur > 0.3 ? `blur(${blur}px)` : "none";
         card.style.zIndex = isNearest ? "100" : String(Math.round(80 - dist * 0.05));
@@ -344,7 +347,7 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
             >
               <div className="ig-mob-card-inner">
                 <div className="ig-mob-front">
-                  <img src={item.image} alt={item.title} draggable={false} loading="lazy" decoding="async" onLoad={(event) => handleImageLoad(item.id, event)} />
+                  <img data-gallery-image data-gallery-image-id={item.id} src={item.image} alt={item.title} draggable={false} decoding="async" onLoad={(event) => handleImageLoad(item.id, event)} />
                 </div>
                 <div className="ig-mob-back">
                   <span className="ig-back-year">{item.year}</span>
@@ -437,7 +440,7 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
               style={{ width: item.width, height: item.height }}
             >
               <div className="ig-card-face ig-front">
-                <img src={item.image} alt={item.title} className="ig-card-img" loading="lazy" draggable={false} onLoad={(event) => handleImageLoad(item.id, event)} />
+                <img data-gallery-image data-gallery-image-id={item.id} src={item.image} alt={item.title} className="ig-card-img" decoding="async" draggable={false} onLoad={(event) => handleImageLoad(item.id, event)} />
                 <div className="ig-card-grain" />
               </div>
               <div className="ig-card-face ig-back">
