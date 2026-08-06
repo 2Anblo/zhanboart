@@ -1,0 +1,434 @@
+:root {
+  color-scheme: dark;
+  --ink: #111211;
+  --charcoal: #1a1c1b;
+  --smoke: #272a28;
+  --line: #3b3e3b;
+  --paper: #e7e2d8;
+  --muted: #96988f;
+  --safe-red: #c84f3d;
+  --safe-red-dark: #7e3026;
+  --green: #89a98a;
+  --danger: #e16b59;
+  font-family: "Avenir Next", "Segoe UI", "Noto Sans SC", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background:
+    radial-gradient(circle at 14% 8%, rgba(200, 79, 61, 0.09), transparent 28rem),
+    var(--ink);
+  color: var(--paper);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+input,
+textarea,
+select,
+.drop-zone {
+  outline: none;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+.drop-zone:focus-within {
+  box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--safe-red);
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 66px;
+  padding: 0 28px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(17, 18, 17, 0.9);
+  backdrop-filter: blur(16px);
+}
+
+.wordmark {
+  color: var(--paper);
+  font-family: "Arial Narrow", "Avenir Next Condensed", sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 0.22em;
+  text-decoration: none;
+}
+
+.status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.72rem;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #c89b3d;
+  box-shadow: 0 0 12px currentColor;
+}
+
+.status.connected .status-dot {
+  background: var(--green);
+}
+
+.status.error .status-dot {
+  background: var(--danger);
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(380px, 0.82fr) minmax(520px, 1.18fr);
+  min-height: calc(100vh - 66px);
+}
+
+.editor,
+.contact-sheet {
+  padding: clamp(30px, 5vw, 72px);
+}
+
+.editor {
+  border-right: 1px solid var(--line);
+}
+
+.section-label {
+  color: var(--safe-red);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.67rem;
+  letter-spacing: 0.18em;
+}
+
+h1 {
+  margin: 24px 0 18px;
+  max-width: 10ch;
+  font-family: "Iowan Old Style", "Songti SC", "Noto Serif SC", serif;
+  font-size: clamp(2.8rem, 5vw, 5.4rem);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.045em;
+}
+
+.intro {
+  max-width: 34rem;
+  margin: 0 0 38px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+.setup-panel,
+.notice {
+  margin: 0 0 24px;
+  padding: 16px 18px;
+  border: 1px solid var(--safe-red-dark);
+  background: rgba(126, 48, 38, 0.15);
+  color: #ddaaa0;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.setup-panel p {
+  margin: 6px 0 10px;
+}
+
+.setup-panel code {
+  color: var(--paper);
+}
+
+form {
+  display: grid;
+  gap: 20px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 12px 2px;
+  background: transparent;
+  color: var(--paper);
+  letter-spacing: normal;
+}
+
+textarea {
+  resize: vertical;
+  line-height: 1.65;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #61645f;
+}
+
+select {
+  color-scheme: dark;
+}
+
+.field-pair,
+.publish-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.drop-zone {
+  position: relative;
+  display: grid;
+  min-height: 250px;
+  overflow: hidden;
+  border: 1px dashed #545852;
+  background:
+    linear-gradient(135deg, transparent 49.7%, rgba(231, 226, 216, 0.06) 50%, transparent 50.3%),
+    var(--charcoal);
+  cursor: pointer;
+}
+
+.drop-zone.dragging {
+  border-color: var(--safe-red);
+  background-color: #211b1a;
+}
+
+.drop-zone input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.drop-zone img {
+  width: 100%;
+  height: 100%;
+  min-height: 250px;
+  max-height: 460px;
+  object-fit: contain;
+  background: #0a0b0a;
+}
+
+.drop-copy {
+  place-self: center;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  color: var(--paper);
+  letter-spacing: normal;
+  text-align: center;
+}
+
+.drop-copy small {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.drop-mark {
+  color: var(--safe-red);
+  font-family: "Iowan Old Style", serif;
+  font-size: 3rem;
+  font-weight: 200;
+  line-height: 1;
+}
+
+.primary-button {
+  align-self: end;
+  min-height: 48px;
+  border: 1px solid var(--safe-red);
+  background: var(--safe-red);
+  color: #140d0b;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #db6653;
+}
+
+.primary-button:disabled {
+  cursor: wait;
+  opacity: 0.5;
+}
+
+.contact-sheet {
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.012) 1px, transparent 1px),
+    #151615;
+  background-size: 24px 24px;
+}
+
+.library-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-bottom: 34px;
+}
+
+h2 {
+  margin: 9px 0 0;
+  font-family: "Iowan Old Style", "Songti SC", serif;
+  font-size: clamp(2rem, 3vw, 3.4rem);
+  font-weight: 400;
+}
+
+.photo-count {
+  color: var(--muted);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.75rem;
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 42px 24px;
+}
+
+.photo-card {
+  min-width: 0;
+}
+
+.photo-frame {
+  aspect-ratio: 4 / 3;
+  padding: 8px;
+  background: #0b0c0b;
+  box-shadow: 0 18px 38px rgba(0, 0, 0, 0.28);
+}
+
+.photo-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.88) contrast(1.03);
+}
+
+.photo-meta {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: end;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+
+.photo-meta time {
+  color: var(--safe-red);
+  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-size: 0.64rem;
+}
+
+.photo-meta h3 {
+  overflow: hidden;
+  margin: 5px 0 3px;
+  font-family: "Iowan Old Style", "Songti SC", serif;
+  font-size: 1.16rem;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.photo-meta p {
+  overflow: hidden;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.delete-button {
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 5px 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+}
+
+.delete-button:hover:not(:disabled) {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.delete-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+
+.empty-state {
+  padding: 80px 24px;
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  line-height: 1.8;
+  text-align: center;
+}
+
+@media (max-width: 980px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .editor {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 620px) {
+  .topbar {
+    padding: 0 18px;
+  }
+
+  .editor,
+  .contact-sheet {
+    padding: 32px 18px 48px;
+  }
+
+  .field-pair,
+  .publish-row,
+  .photo-grid {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 3.25rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}

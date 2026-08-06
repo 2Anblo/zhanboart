@@ -1,56 +1,51 @@
-# Photo admin
+# Local R2 photo admin
 
 ## Goal
 
-The owner can maintain the public photo page without editing source files.
+The owner can maintain the public photo page from a localhost-only tool without
+running an online CMS.
 
 ## Content model
 
-The photo library has two layers:
+The photo library has two sources of truth:
 
-- **Media** is the source of truth for which images appear in the gallery.
-- **Photos** adds optional editorial metadata and a detail page to an image.
+- **Cloudflare R2** stores image objects.
+- **Markdown** in `content/photos/` stores editorial metadata and detail pages.
 
-This keeps the common upload/delete flow short while preserving richer photo
-stories when they are wanted.
+The local tool changes both together. Existing images committed under
+`public/images/gallery/` remain visible but read-only in the tool.
 
 ## Admin flows
 
 ### Upload
 
-1. Open `/admin` and sign in.
-2. Open **Media**.
-3. Upload an image to the gallery root.
-4. The image appears on `/photos` after the content commit is deployed.
+1. Run `npm run photo-admin`.
+2. Open `http://127.0.0.1:4173`.
+3. Select an image and add the desired metadata.
+4. Choose **上传并保存**.
+5. Commit and push the generated Markdown file.
 
 ### Delete
 
-1. Open **Media**.
-2. Select the image and delete it.
-3. The image disappears from `/photos` after the content commit is deployed.
-4. If the image has a matching **Photos** item, delete that item as well so its
-   detail page is removed.
-
-### Add details
-
-1. Create a **Photos** item.
-2. Select an existing image from the media library.
-3. Add title, date, caption, location, mood, tags, visibility, and body as
-   needed.
-4. Save. The gallery card now uses those details and links to its detail page.
+1. Select **删除** on an R2-managed photo.
+2. Confirm the irreversible action.
+3. The tool stages the Markdown record, deletes the R2 object, then removes the
+   staged record. If R2 deletion fails, the Markdown is restored.
+4. Commit and push the deletion.
 
 ## Storage and deployment
 
-- Images live in `public/images/gallery/` and are committed to Git.
-- Metadata lives in `content/photos/` as Markdown and is committed to Git.
-- Local editing uses Tina's local server through `npm run dev`.
-- Production editing uses TinaCloud authentication and the repository
-  integration configured by `NEXT_PUBLIC_TINA_CLIENT_ID`, `TINA_TOKEN`, and
-  `NEXT_PUBLIC_TINA_BRANCH`.
+- New images live under `photos/YYYY/MM/` in the configured R2 bucket.
+- Metadata lives in `content/photos/` and is committed to Git.
+- The tool uses R2's S3-compatible API and an Object Read & Write token scoped
+  to one bucket.
+- The tool binds only to `127.0.0.1` and validates the request host.
+- R2 credentials live in `.env.local`, which is ignored by Git.
+- Public delivery uses `CLOUDFLARE_R2_PUBLIC_URL`; a custom domain is preferred.
 
 ## Constraints
 
-- The site remains a static export; admin changes become public after a build.
-- Media deletion and metadata deletion are intentionally separate operations.
-- Images without metadata still appear, using a readable version of the file
-  name as their gallery title and no detail-page link.
+- The site remains a static export; changes become public after Git deployment.
+- Uploads are limited to supported image MIME types and 30 MB.
+- R2 deletion is irreversible and always requires an explicit browser confirm.
+- The local tool never exposes credentials through its API.
