@@ -17,7 +17,7 @@ export interface GalleryItem {
 const CANVAS_W = 3200;
 const CANVAS_H_MIN = 1600;
 const CANVAS_Y_PADDING = 520;
-const BASE_CARD_W = 280;
+const FALLBACK_CARD_W = 280;
 const BASE_CARD_H = 380;
 const ROW_HEIGHT_MIN = 420;
 const ROW_HEIGHT_MAX = 540;
@@ -35,7 +35,7 @@ function randInt(min: number, max: number) {
 /**
  * Generate an irregular scatter layout for gallery photos.
  * Photos are grouped into rows with varying counts (2~5 per row),
- * random vertical spacing, jittered positions, and varying card sizes.
+ * random vertical spacing, jittered positions, and a consistent card height.
  */
 export function generateScatterLayout(
   entries: ContentEntry[],
@@ -73,10 +73,10 @@ export function generateScatterLayout(
       const entry = source.entry;
       sourceIndex++;
 
-      // Vary card size ±15%
-      const sizeVar = rand(0.85, 1.15);
-      const width = Math.round(BASE_CARD_W * sizeVar);
-      const height = Math.round(BASE_CARD_H * sizeVar);
+      // Keep every card at one height. The width is refined from the image's
+      // natural dimensions once it has loaded in the gallery.
+      const width = FALLBACK_CARD_W;
+      const height = BASE_CARD_H;
 
       // Jitter position
       const jitterX = rand(-20, 20);

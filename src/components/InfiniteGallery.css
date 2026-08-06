@@ -368,9 +368,10 @@
 .ig-card-img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   pointer-events: none;
+  background: #0c0d0c;
 }
 
 .ig-card-grain {
@@ -586,9 +587,9 @@
 }
 
 .ig-mob-card {
-  flex: 0 0 70vw;
-  max-width: 280px;
-  aspect-ratio: 3 / 4;
+  flex: 0 0 auto;
+  height: clamp(260px, 58vh, 380px);
+  aspect-ratio: var(--card-ratio, 280 / 380);
   border-radius: 8px;
   scroll-snap-align: center;
   perspective: 800px;
@@ -629,9 +630,10 @@
 .ig-mob-front img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
   pointer-events: none;
+  background: #0c0d0c;
 }
 
 .ig-mob-back {
