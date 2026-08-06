@@ -300,7 +300,6 @@ export async function deleteRemotePhoto(slug: string): Promise<void> {
   const photo = photoFromMarkdown(decodeGitHubContent(file.content), file.name);
   if (!photo.r2Key) throw new Error("这是一张旧的本地照片，不能从线上 R2 后台删除");
 
-  await config.client.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: photo.r2Key }));
   try {
     await githubRequest(githubUrl(filePath), {
       method: "DELETE",
@@ -308,7 +307,13 @@ export async function deleteRemotePhoto(slug: string): Promise<void> {
       body: JSON.stringify({ message: `Delete photo: ${photo.title}`, sha: file.sha, branch: github.branch }),
     });
   } catch (error) {
-    throw new Error(`R2 已删除，但 GitHub Markdown 删除失败，请重试或手动删除 ${filePath}：${String(error)}`);
+    throw new Error(`GitHub Markdown 删除失败，R2 图片未删除，请重试 ${filePath}：${String(error)}`);
+  }
+
+  try {
+    await config.client.send(new DeleteObjectCommand({ Bucket: config.bucket, Key: photo.r2Key }));
+  } catch (error) {
+    throw new Error(`GitHub Markdown 已删除，但 R2 图片删除失败，请在 R2 手动删除 ${photo.r2Key}：${String(error)}`);
   }
 }
 
