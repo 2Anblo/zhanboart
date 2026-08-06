@@ -69,12 +69,12 @@ export type MemoryFragment =
   | { kind: "trace"; label: string; value: string; className: string }
 
 export const memoryStripConfig: MemoryFragment[] = [
-  { kind: "image", src: "/images/gallery/item3.jpg", alt: "一束落在墙上的光", className: "memory-fragment--image-a" },
+  { kind: "image", src: "/images/hero/night-window.jpg", alt: "雨夜窗外的灯光", className: "memory-fragment--image-a" },
   { kind: "text", eyebrow: "23:48 / ROOM", text: "有些夜晚只是坐着，也足够接近自己。", className: "memory-fragment--text-a" },
   { kind: "trace", label: "LISTENING", value: "SELF CONTROL / 00:41:12", className: "memory-fragment--trace-a" },
-  { kind: "image", src: "/images/gallery/item8.jpg", alt: "夜里的模糊影像", className: "memory-fragment--image-b" },
+  { kind: "image", src: "/images/rooms/room1-back.jpg", alt: "桌上的灯与纸页", className: "memory-fragment--image-b" },
   { kind: "text", eyebrow: "MEMORY / 07.15", text: "光从窗帘的缝隙里，留下很慢的灰尘。", className: "memory-fragment--text-b" },
-  { kind: "image", src: "/images/gallery/item1.jpg", alt: "被屏幕照亮的片段", className: "memory-fragment--image-c" },
+  { kind: "image", src: "/images/gallery/white-ferrari.png", alt: "夜色里的车与树影", className: "memory-fragment--image-c" },
 ]
 
 // --- Particle Sculpture (Journal Section) ---

@@ -34,10 +34,10 @@ excerpt: "Short description"
 mood: "quiet"
 location: "Shanghai"
 tags: ["life", "memory"]
-image: "/images/gallery/item1.jpg"
+image: "/images/hero/night-window.jpg"
 caption: "Image caption"
 audio: "/music/example.mp3"
-albumArt: "/images/gallery/item5.jpg"
+albumArt: "/images/rooms/room2-left.jpg"
 artist: "Artist"
 visibility: "public"
 ---
