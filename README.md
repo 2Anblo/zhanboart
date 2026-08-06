@@ -10,7 +10,7 @@ The site uses Next.js App Router with static export and Markdown content from `c
 - React 19 + TypeScript
 - Tailwind CSS
 - Markdown content with `gray-matter`
-- TinaCMS lightweight content admin
+- Local R2 photo admin
 
 ## Content
 
@@ -56,24 +56,22 @@ Local site:
 http://localhost:3000
 ```
 
-TinaCMS admin:
+Local photo admin:
 
 ```text
-http://localhost:3000/admin
+npm run photo-admin
+http://127.0.0.1:4173
 ```
 
 ### Photo workflow
 
-- Open **Media** in the admin to upload or delete photos. Files are stored in
-  `public/images/gallery/`, and the photo page reads this folder directly.
-- Uploading a photo makes it appear on the photo page after the next build.
-- Deleting a photo removes it from the photo page after the next build.
-- Create an item in **Photos** only when a photo needs a title, date, caption,
-  location, visibility setting, or detail page. Select the same image from the
-  media library in that item.
-- Deleting a **Photos** item removes its metadata/detail page but deliberately
-  keeps the underlying image. Delete the image from **Media** when it should
-  disappear from the gallery completely.
+- The admin binds to `127.0.0.1` and is never deployed with the public site.
+- Uploads are sent from the local server to Cloudflare R2 using S3 credentials.
+- Each upload creates a matching Markdown file in `content/photos/`.
+- Deleting an R2-managed photo removes both the object and its Markdown file.
+- Existing repository images are shown as read-only and are not deleted by the
+  R2 admin.
+- Commit and push the generated Markdown after editing to publish the change.
 
 ## Build
 
@@ -82,27 +80,27 @@ npm run lint
 npm run build
 ```
 
-`npm run build` builds the Tina admin first, then runs `next build`.
+`npm run build` produces the static site in `out/`.
 
-## TinaCMS
+## Local R2 photo admin
 
-Tina schema is defined in `tina/config.ts`.
+Copy `.env.example` to `.env.local` and configure:
 
-Generated Tina files are intentionally ignored:
-
-- `public/admin/`
-- `tina/__generated__/`
-- `tina/tina-lock.json`
-
-For Vercel production editing, configure these environment variables:
-
-```env
-NEXT_PUBLIC_TINA_CLIENT_ID=
-TINA_TOKEN=
-NEXT_PUBLIC_TINA_BRANCH=master
+```dotenv
+CLOUDFLARE_ACCOUNT_ID=
+CLOUDFLARE_R2_ACCESS_KEY_ID=
+CLOUDFLARE_R2_SECRET_ACCESS_KEY=
+CLOUDFLARE_R2_BUCKET=
+CLOUDFLARE_R2_PUBLIC_URL=https://media.example.com
+PHOTO_ADMIN_PORT=4173
 ```
 
-Use `.env.example` as the local template. The Tina Cloud values come from the Tina project dashboard.
+The R2 token needs **Object Read & Write** access scoped to the selected bucket.
+`CLOUDFLARE_R2_PUBLIC_URL` should be a custom domain connected to the bucket for
+production. An `r2.dev` URL can be used temporarily for testing.
+
+Start the tool with `npm run photo-admin`. Credentials stay server-side and are
+never returned by its status endpoint.
 
 ## Deployment
 
