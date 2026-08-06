@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, DragEvent, FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import "./admin.css";
 
@@ -31,7 +31,53 @@ export default function OnlinePhotoAdmin() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedFileName, setSelectedFileName] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  function validateFile(file: File): string | null {
+    const acceptedTypes = new Set(["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"]);
+    if (!acceptedTypes.has(file.type)) return "请拖入 JPG、PNG、WebP、GIF 或 AVIF 图片。";
+    if (file.size > 30 * 1024 * 1024) return "图片不能超过 30 MB。";
+    return null;
+  }
+
+  function setSelectedFile(file: File | undefined) {
+    if (!file || !fileInputRef.current) return;
+    const validationError = validateFile(file);
+    setError(validationError || "");
+    setMessage("");
+    if (validationError) {
+      fileInputRef.current.value = "";
+      setSelectedFileName("");
+      return;
+    }
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    fileInputRef.current.files = transfer.files;
+    setSelectedFileName(file.name);
+  }
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>) {
+    setSelectedFile(event.target.files?.[0]);
+  }
+
+  function handleDragOver(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+    setIsDragging(true);
+  }
+
+  function handleDragLeave(event: DragEvent<HTMLLabelElement>) {
+    if (event.currentTarget === event.target) setIsDragging(false);
+  }
+
+  function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setIsDragging(false);
+    setSelectedFile(event.dataTransfer.files?.[0]);
+  }
 
   async function loadPhotos() {
     const response = await fetch("/api/admin/photos", { cache: "no-store" });
@@ -94,6 +140,7 @@ export default function OnlinePhotoAdmin() {
       const data = (await response.json()) as { error?: string };
       if (!response.ok) throw new Error(data.error || "上传失败");
       event.currentTarget.reset();
+      setSelectedFileName("");
       setMessage("已上传，GitHub 正在触发网站重新部署。");
       await loadPhotos();
     } catch (uploadError) {
@@ -170,11 +217,11 @@ export default function OnlinePhotoAdmin() {
           {message ? <p className="form-success" role="status">{message}</p> : null}
           {error ? <p className="form-error" role="alert">{error}</p> : null}
           <form ref={formRef} onSubmit={handleUpload} className="photo-form">
-            <label className="drop-zone" htmlFor="photo-file">
+            <label className={`drop-zone ${isDragging ? "is-dragging" : ""}`} htmlFor="photo-file" onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}>
               <span className="drop-symbol">＋</span>
-              <strong>选择或拖入照片</strong>
-              <small>JPG / PNG / WebP / GIF / AVIF · 最大 30 MB</small>
-              <input id="photo-file" name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" required />
+              <strong>{isDragging ? "松开以放入照片" : selectedFileName || "选择或拖入照片"}</strong>
+              <small>{selectedFileName ? "已准备上传 · 点击可更换" : "JPG / PNG / WebP / GIF / AVIF · 最大 30 MB"}</small>
+              <input ref={fileInputRef} id="photo-file" name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" onChange={handleFileChange} required />
             </label>
             <div className="form-fields">
               <label>标题<input name="title" placeholder="百叶窗的光" required /></label>
