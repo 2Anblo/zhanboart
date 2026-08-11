@@ -329,8 +329,6 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
         <div className="ig-grain" />
         <div className="ig-header">
           <span className="ig-eyebrow">[ PHOTOS ]</span>
-          <h2 className="ig-title">照片</h2>
-          <p className="ig-subtitle">Light archive</p>
         </div>
         <div className="ig-counter">
           <span>
@@ -396,8 +394,6 @@ export default function InfiniteGallery({ entries, galleryImages }: InfiniteGall
 
       <div className="ig-header">
         <span className="ig-eyebrow">[ PHOTOS ]</span>
-        <h2 className="ig-title">照片</h2>
-        <p className="ig-subtitle">Light archive</p>
       </div>
 
       <div className="ig-counter">
