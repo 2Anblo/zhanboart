@@ -1,9 +1,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import matter from "gray-matter";
+import { CONTENT_TYPES } from "@/lib/content-model";
+import type { ContentType, Visibility } from "@/lib/content-model";
 
-export type ContentType = "journal" | "notes" | "photos" | "music" | "thoughts";
-export type Visibility = "public" | "unlisted" | "draft";
+export type { ContentType, Visibility } from "@/lib/content-model";
 
 export interface ContentEntry {
   type: ContentType;
@@ -24,8 +25,6 @@ export interface ContentEntry {
 }
 
 const contentRoot = path.join(process.cwd(), "content");
-const contentTypes: ContentType[] = ["journal", "notes", "photos", "music", "thoughts"];
-
 function normalizeTags(value: unknown): string[] {
   if (Array.isArray(value)) return value.map(String);
   if (typeof value === "string") return value.split(",").map((tag) => tag.trim()).filter(Boolean);
@@ -79,7 +78,7 @@ export function getEntry(type: ContentType, slug: string): ContentEntry | undefi
 }
 
 export function getAllEntries(includeDrafts = false): ContentEntry[] {
-  return contentTypes
+  return CONTENT_TYPES
     .flatMap((type) => getEntries(type, includeDrafts))
     .sort((a, b) => b.date.localeCompare(a.date));
 }

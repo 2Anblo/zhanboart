@@ -3,7 +3,7 @@
 Personal site for private writing, notes, photos, light, night, music, and memory.
 
 The site uses Next.js App Router with Markdown content from `content/`. The public
-site runs on Vercel, and the photo admin is available online at `/admin`.
+site runs on Vercel, and the private content index is available online at `/admin`.
 
 ## Stack
 
@@ -11,7 +11,7 @@ site runs on Vercel, and the photo admin is available online at `/admin`.
 - React 19 + TypeScript
 - Tailwind CSS
 - Markdown content with `gray-matter`
-- Vercel online photo admin
+- Vercel online content admin
 - Local R2 photo admin fallback
 
 ## Content
@@ -71,21 +71,21 @@ Online photo admin:
 https://your-domain.example/admin
 ```
 
-### Photo workflow
+### Content workflow
 
 - The online admin is protected by a password stored only in Vercel environment variables.
-- The upload area supports both clicking to choose a file and dragging a JPG, PNG, WebP, GIF, or AVIF file into the drop zone (maximum 30 MB).
-- Uploads are sent server-side to Cloudflare R2 using S3 credentials.
-- Each upload commits a matching Markdown file to GitHub, which triggers a Vercel deployment.
-- Deleting an R2-managed photo removes both the object and its Markdown file.
+- Journal, notes, photos, music, and thoughts share create, edit, delete, search, and visibility controls.
+- Archive is a chronological view of those five collections rather than a separate content source.
+- Images and common audio formats are sent server-side to Cloudflare R2 using S3 credentials.
+- Each save commits the matching Markdown file to GitHub, which triggers a Vercel deployment.
+- Deleting R2-managed content removes both its owned media and Markdown file.
 - The admin also lists and manages image resources under `public/images` (gallery, hero, rooms, and uploads).
 - Site resource uploads are committed to GitHub and become public after the Vercel deployment completes.
-- Existing repository images without an `r2Key` are shown as read-only.
-- The local tool remains available when you want to work without sending admin traffic online.
+- Existing repository media referenced by URL is never deleted with a content item.
+- The local photo tool remains available as a fallback for the photo-only workflow.
 
-The `/admin` session is shared by future content modules. Photo management is the
-first module; journal, notes, music, and other resources can use the same admin
-entry point later without introducing another login system.
+The `/admin` session protects every content module without introducing another
+login system or a separate database.
 
 ## Build
 
@@ -134,12 +134,13 @@ GITHUB_OWNER=2Anblo
 GITHUB_REPO=zhanboart
 GITHUB_TOKEN=
 GITHUB_BRANCH=master
-GITHUB_CONTENT_PATH=content/photos
+GITHUB_CONTENT_ROOT=content
 ```
 
 `ADMIN_SESSION_SECRET` should be a long random value. The GitHub token needs
-permission to read and write contents in this repository. The R2 token needs **Object
-Read & Write** access scoped to the selected bucket.
+permission to read and write contents in this repository. `GITHUB_CONTENT_ROOT`
+defaults to `content`. The R2 token needs **Object Read & Write** access scoped to
+the selected bucket.
 
 In Vercel, enter the variable name and value in separate fields. After changing an
 environment variable, redeploy the project before testing `/admin`.

@@ -1,5 +1,9 @@
 # Online R2 photo admin
 
+> This photo-only specification is preserved for history. The current admin is
+> defined by `docs/unified-content-admin-spec.md` and keeps these photo flows as
+> one module inside the unified private index.
+
 ## Goal
 
 The owner can maintain the public photo page from a password-protected Vercel admin
