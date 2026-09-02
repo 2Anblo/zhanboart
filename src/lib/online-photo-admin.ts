@@ -351,6 +351,12 @@ function formText(form: FormData, name: string, fallback = ""): string {
   return typeof value === "string" ? value.trim() : fallback;
 }
 
+function formMultilineText(form: FormData, name: string, fallback = ""): string {
+  if (!form.has(name)) return fallback;
+  const value = form.get(name);
+  return typeof value === "string" ? value.replace(/\r\n?/g, "\n") : fallback;
+}
+
 function validDate(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const date = new Date(`${value}T00:00:00Z`);
@@ -427,7 +433,7 @@ export async function saveRemoteContent(
     if (files.some((file) => file.name === `${slug}.md`)) throw new Error("这个固定链接已经存在");
   }
 
-  const body = formText(form, "body", existing?.body || "");
+  const body = formMultilineText(form, "body", existing?.body || "");
   if (Buffer.byteLength(body, "utf8") > 1024 * 1024) throw new Error("正文不能超过 1 MB");
 
   let image = mediaReference(formText(form, "image", existing?.image || ""), "图片地址");
