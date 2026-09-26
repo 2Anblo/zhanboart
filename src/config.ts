@@ -42,40 +42,166 @@ export const navigationConfig: NavigationConfig = {
   ],
 }
 
-// --- Homepage Hero ---
+// --- Homepage Landing Stage ---
+// One pinned stage, scrolled through as chapters.
 
-export interface HeroConfig {
-  line: string
-  ariaLabel: string
-  posterSrc: string
-  posterSrcLight?: string
-  videoSrc?: string
-  videoSrcLight?: string
-  objectPosition: string
+export interface ThemedImage {
+  dark: string
+  light: string
+  alt: string
 }
 
-export const heroConfig: HeroConfig = {
-  line: "屏幕亮着，房间没有开灯。",
-  ariaLabel: "夜晚房间中的私人片段",
-  posterSrc: "/images/hero/night-window.jpg",
-  objectPosition: "57% center",
+export interface LandingChapter {
+  id: string
+  index: string
+  label: string
 }
 
-// --- Homepage Memory Strip ---
+export interface LandingFragment {
+  title: string
+  body: string
+}
 
-export type MemoryFragment =
-  | { kind: "image"; src: string; alt: string; className: string }
-  | { kind: "text"; eyebrow: string; text: string; className: string }
-  | { kind: "trace"; label: string; value: string; className: string }
+export interface LandingConfig {
+  chapters: LandingChapter[]
+  hero: {
+    image: ThemedImage
+    title: string
+    titleLight: string
+    subtitle: string[]
+    cta: { label: string; href: string }
+    chip: string
+    body: string
+  }
+  journal: {
+    image: ThemedImage
+    title: string[]
+    chip: string
+    fallback: string
+    cta: string
+  }
+  photos: {
+    halftone: ThemedImage
+    groups: { chip: string; title: string[]; body: string }[]
+    cta: string
+  }
+  music: {
+    image: ThemedImage
+    title: string[]
+    chip: string
+    body: string
+    cta: string
+  }
+  fragments: {
+    image: ThemedImage
+    title: string
+    script: string
+    items: LandingFragment[]
+  }
+  finale: {
+    figure: ThemedImage
+    wordmark: string
+    tagline: string[]
+    meta: string
+    links: { label: string; href: string }[]
+  }
+}
 
-export const memoryStripConfig: MemoryFragment[] = [
-  { kind: "image", src: "/images/hero/night-window.jpg", alt: "雨夜窗外的灯光", className: "memory-fragment--image-a" },
-  { kind: "text", eyebrow: "23:48 / ROOM", text: "有些夜晚只是坐着，也足够接近自己。", className: "memory-fragment--text-a" },
-  { kind: "trace", label: "LISTENING", value: "SELF CONTROL / 00:41:12", className: "memory-fragment--trace-a" },
-  { kind: "image", src: "/images/rooms/room1-back.jpg", alt: "桌上的灯与纸页", className: "memory-fragment--image-b" },
-  { kind: "text", eyebrow: "MEMORY / 07.15", text: "光从窗帘的缝隙里，留下很慢的灰尘。", className: "memory-fragment--text-b" },
-  { kind: "image", src: "/images/gallery/white-ferrari.png", alt: "夜色里的车与树影", className: "memory-fragment--image-c" },
-]
+export const landingConfig: LandingConfig = {
+  chapters: [
+    { id: "journal", index: "Ch. 1", label: "日志" },
+    { id: "photos", index: "Ch. 2", label: "照片" },
+    { id: "music", index: "Ch. 3", label: "音乐" },
+    { id: "fragments", index: "Ch. 4", label: "碎片" },
+  ],
+  hero: {
+    image: {
+      dark: "/images/hero/night-window.jpg",
+      light: "/images/rooms/room2-right.jpg",
+      alt: "窗外的光",
+    },
+    title: "屏幕亮着，房间没有开灯。",
+    titleLight: "窗帘拉开，光落在墙上。",
+    subtitle: ["一些不需要被总结的东西，", "碎片、光线和记忆。"],
+    cta: { label: "开始阅读", href: "#journal" },
+    chip: "zhanbo.art",
+    body: "这里不是工作主页，也不是项目展示。它更像一个数字化的抽屉：随手写下的片段，偶尔拍到的光线，某个深夜听到的歌。",
+  },
+  journal: {
+    image: {
+      dark: "/images/rooms/room1-back.jpg",
+      light: "/images/rooms/room4-right.jpg",
+      alt: "台灯下摊开的本子",
+    },
+    title: ["写下来，", "是为了不再遗忘。"],
+    chip: "最新日志",
+    fallback: "有些夜晚只是坐着，也足够接近自己。",
+    cta: "全部日志",
+  },
+  photos: {
+    halftone: {
+      dark: "/images/hero/night-window.jpg",
+      light: "/images/rooms/room2-right.jpg",
+      alt: "以网点呈现的一张旧照片",
+    },
+    groups: [
+      {
+        chip: "照片",
+        title: ["光停留过的地方，", "会留下一点形状。"],
+        body: "不是作品集。只是那些让我停下来的瞬间：窗帘的缝隙，路灯下的车，屏幕里的一帧。",
+      },
+      {
+        chip: "关于颗粒",
+        title: ["记忆不是高清的，", "它有噪点。"],
+        body: "越久远的画面，越像由一颗颗小点组成。靠近时散开，退后才看得清。",
+      },
+    ],
+    cta: "进入照片",
+  },
+  music: {
+    image: {
+      dark: "/images/rooms/room3-right.jpg",
+      light: "/images/rooms/room4-left.jpg",
+      alt: "转动的黑胶唱片",
+    },
+    title: ["声音比语言", "更早抵达记忆"],
+    chip: "音乐",
+    body: "有些歌适合在深夜单独听。不是作为背景音，而是作为房间里另一个沉默的参与者。",
+    cta: "去听一听",
+  },
+  fragments: {
+    image: {
+      dark: "/images/rooms/room3-back.jpg",
+      light: "/images/rooms/room4-back.jpg",
+      alt: "黄昏的海平线",
+    },
+    title: "夜里想过的事",
+    script: "after midnight",
+    items: [
+      { title: "23:48 / 房间", body: "有些夜晚只是坐着，也足够接近自己。" },
+      { title: "07.15 / 窗帘", body: "光从窗帘的缝隙里，留下很慢的灰尘。" },
+      { title: "关于语言", body: "任何语言都不过是人与人之间的桥。意思抵达了，口音就不重要。" },
+      { title: "LISTENING", body: "Self Control，第三次循环。副歌前那一秒的安静最好。" },
+      { title: "关于完整", body: "有时候，不完整比完整更接近真实。" },
+    ],
+  },
+  finale: {
+    figure: {
+      dark: "/images/dark-mode.png",
+      light: "/images/light-mode.png",
+      alt: "戴耳机的人",
+    },
+    wordmark: "zhanbo.",
+    tagline: ["一些不需要被总结的东西。"],
+    meta: "ZHANBO.ART · URBANA — SHANGHAI · 2026",
+    links: [
+      { label: "日志", href: "/journal" },
+      { label: "照片", href: "/photos" },
+      { label: "音乐", href: "/music" },
+      { label: "归档", href: "/archive" },
+    ],
+  },
+}
 
 // --- Particle Sculpture (Journal Section) ---
 
