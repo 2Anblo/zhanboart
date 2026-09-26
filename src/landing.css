@@ -890,17 +890,29 @@ html.light .stage-grain {
   color: var(--ink);
 }
 
-.stage-mark svg {
-  width: 26px;
-  height: 26px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
-  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+/* Monogram echoing the "zhanbo." wordmark in the finale. */
+.stage-mark__glyph {
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  text-decoration: none;
+  transform: translateY(-3px);
 }
 
-.stage-mark:hover svg {
-  transform: rotate(-24deg);
+.stage-mark__glyph i {
+  display: inline-block;
+  font-style: normal;
+  transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.stage-mark {
+  text-decoration: none;
+}
+
+.stage-mark:hover .stage-mark__glyph i {
+  transform: translateY(-5px);
 }
 
 .stage-dots {

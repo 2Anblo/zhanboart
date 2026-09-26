@@ -540,14 +540,15 @@ export default function LandingStage({ journal, photos, lenisRef }: LandingStage
             className="stage-mark"
             href="#top"
             aria-label="回到顶部"
+            title="回到顶部"
             onClick={(event) => {
               event.preventDefault();
               scrollToScene(0);
             }}
           >
-            <svg viewBox="0 0 32 32" aria-hidden="true">
-              <path d="M20.5 4.5a11.5 11.5 0 1 0 7 20.6A12.5 12.5 0 0 1 20.5 4.5Z" />
-            </svg>
+            <span className="stage-mark__glyph" aria-hidden="true">
+              z<i>.</i>
+            </span>
           </a>
           <Link className="stage-dots" href="/menu" aria-label={navigationConfig.menuLabel}>
             <i /><i /><i /><i />
