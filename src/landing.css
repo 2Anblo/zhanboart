@@ -82,11 +82,12 @@ html.light .stage {
 }
 
 /* Lines rise from their own mask as --in goes 0 → 1. */
+/* Padding on both sides so CJK glyphs, which sit higher than Latin ones, are not clipped. */
 .stage .ln {
   display: block;
   overflow: hidden;
-  padding-bottom: 0.1em;
-  margin-bottom: -0.1em;
+  padding: 0.16em 0 0.12em;
+  margin: -0.16em 0 -0.12em;
 }
 
 .stage .ln > i {
@@ -556,7 +557,7 @@ html.light .scene--photos {
   font-family: var(--serif);
   font-size: clamp(3rem, 8.4vw, 8.8rem);
   font-weight: 300;
-  line-height: 1.02;
+  line-height: 1.14;
   letter-spacing: -0.035em;
   color: #f3ecdd;
 }
