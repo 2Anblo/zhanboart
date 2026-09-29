@@ -287,7 +287,7 @@ function contentFromMarkdown(type: ContentType, raw: string, fileName: string): 
   return {
     type,
     slug,
-    title: String(data.title || slug),
+    title: type === "notes" ? "" : String(data.title || slug),
     date: String(data.date || ""),
     excerpt: String(data.excerpt || data.caption || ""),
     caption: String(data.caption || data.excerpt || ""),
@@ -407,10 +407,12 @@ export async function saveRemoteContent(
   if (identity && identity.type !== type) throw new Error("不能在编辑时更改内容类型");
   if (identity && !SLUG_PATTERN.test(identity.slug)) throw new Error("内容标识无效");
 
-  const date = formText(form, "date", new Date().toISOString().slice(0, 10));
+  const previousFile = identity && type === "notes" ? await readGitHubFile(`${contentDirectory(type)}/${identity.slug}.md`) : undefined;
+  const previousDate = previousFile ? String(matter(decodeGitHubContent(previousFile.content)).data.date || "") : "";
+  const date = formText(form, "date", previousDate || new Date().toISOString().slice(0, 10));
   if (!validDate(date)) throw new Error("日期格式无效");
-  const title = formText(form, "title");
-  if (!title) throw new Error("请填写标题");
+  const title = type === "notes" ? "" : formText(form, "title");
+  if (type !== "notes" && !title) throw new Error("请填写标题");
   const fallbackPrefix: Record<ContentType, string> = {
     journal: "journal",
     notes: "note",
@@ -468,6 +470,7 @@ export async function saveRemoteContent(
     }
 
     if (type === "photos" && !image) throw new Error("照片记录需要图片文件或图片地址");
+    if (type === "notes" && !body.trim() && !image) throw new Error("请写点文字或添加一张图片");
     const visibilityValue = formText(form, "visibility", existing?.visibility || "public");
     const visibility: Visibility = isVisibility(visibilityValue) ? visibilityValue : "public";
     const excerpt = formText(form, "excerpt", existing?.excerpt || "");
@@ -475,6 +478,7 @@ export async function saveRemoteContent(
     const frontmatter = compactFrontmatter({
       ...existingMatter.data,
       title,
+      createdAt: type === "notes" ? existingMatter.data.createdAt || (identity ? undefined : new Date().toISOString()) : existingMatter.data.createdAt,
       date,
       type,
       slug,

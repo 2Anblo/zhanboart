@@ -882,3 +882,16 @@ html.light .menu-page__side {
 :root {
   --ease-gallery: cubic-bezier(0.22, 1, 0.36, 1);
 }
+
+/* Title-free activity stream, shared by the feed and existing entry links. */
+.activity-feed { max-width: 760px; }
+.activity-entry { padding: 2rem 0; border-bottom: 1px solid rgba(148, 163, 184, .25); }
+.activity-entry:first-of-type { padding-top: 0; }
+.activity-entry:last-child { border-bottom: 0; }
+.activity-entry time { display: block; margin-bottom: 1rem; }
+.activity-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 1rem; line-height: 1.9; }
+.activity-image { display: block; width: auto; max-width: 100%; height: auto; max-height: 720px; object-fit: contain; margin-top: 1.25rem; border-radius: 6px; }
+@media (max-width: 600px) {
+  .activity-entry { padding: 1.5rem 0; }
+  .activity-text { font-size: .95rem; }
+}

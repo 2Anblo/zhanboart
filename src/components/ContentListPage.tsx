@@ -6,7 +6,7 @@ import ProgressiveBlurFade from "@/components/ProgressiveBlurFade";
 
 const pageConfig: Record<ContentType, { title: string; kicker: string }> = {
   journal: { title: "Journal", kicker: "Longer records" },
-  notes: { title: "Notes", kicker: "Fragments" },
+  notes: { title: "动态", kicker: "Activity" },
   photos: { title: "Photos", kicker: "Light archive" },
   music: { title: "Music", kicker: "Sound and words" },
   thoughts: { title: "Thoughts", kicker: "Loose thoughts" },

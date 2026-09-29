@@ -4,6 +4,11 @@
 
 // --- Site ---
 
+export const activityConfig = {
+  label: "动态",
+  empty: "还没有动态。",
+};
+
 export const quickJournalConfig = {
   heading: "随手记",
   placeholder: "这一刻，想留下什么……",
@@ -11,7 +16,7 @@ export const quickJournalConfig = {
   replaceImage: "更换图片",
   removeImage: "移除图片",
   preview: "待发布的图片",
-  publicNote: "公开到日志 · 日期自动记录",
+  publicNote: "公开到动态 · 日期自动记录",
   noMedia: "图片上传暂不可用",
   publish: "发布",
   sending: "正在发布……",
@@ -46,7 +51,7 @@ export const navigationConfig: NavigationConfig = {
   fullscreenMenuLinks: [
     { label: "首页", href: "/" },
     { label: "日志", href: "/journal" },
-    { label: "笔记", href: "/notes" },
+    { label: "动态", href: "/notes" },
     { label: "照片", href: "/photos" },
     { label: "音乐", href: "/music" },
     { label: "想法", href: "/thoughts" },
@@ -250,7 +255,7 @@ export interface LighthouseVideoConfig {
 }
 
 export const lighthouseVideoConfig: LighthouseVideoConfig = {
-  sectionLabel: "笔记",
+  sectionLabel: "动态",
   dataPoints: [
     "2026.07.15 — 半夜听雨，突然觉得安静是一种能力",
     "在读：《时间的秩序》— 卡洛·罗韦利",
@@ -297,7 +302,7 @@ export const footerConfig: FooterConfig = {
   linkColumns: [
     {
       heading: "内容",
-      links: ["日志", "笔记", "照片", "音乐", "归档"],
+      links: ["日志", "动态", "照片", "音乐", "归档"],
     },
     {
       heading: "关于",
