@@ -51,7 +51,7 @@ const visibilityLabels: Record<Visibility, string> = {
 };
 
 const viewLabels: Record<AdminView, { title: string; kicker: string; note: string }> = {
-  overview: { title: "私人索引", kicker: "PRIVATE INDEX", note: "所有留在这里的文字、声音与光。" },
+  overview: { title: "内容总览", kicker: "DASHBOARD", note: "发布新日志，查看和管理你的全部内容。" },
   journal: { title: "日志", kicker: "JOURNAL", note: CONTENT_TYPE_META.journal.description },
   notes: { title: "笔记", kicker: "NOTES", note: CONTENT_TYPE_META.notes.description },
   photos: { title: "照片", kicker: "PHOTOS", note: CONTENT_TYPE_META.photos.description },
@@ -301,21 +301,21 @@ export default function UnifiedContentAdmin() {
   }
 
   if (authenticated === null) {
-    return <main className="online-admin online-admin--loading" aria-busy="true">正在翻开私人索引……</main>;
+    return <main className="online-admin online-admin--loading" aria-busy="true">正在加载管理后台……</main>;
   }
 
   if (!authenticated) {
     return (
       <main className="online-admin online-admin--login">
         <section className="login-card" aria-labelledby="login-title">
-          <p className="admin-eyebrow">ZHANBO.ART / PRIVATE INDEX</p>
-          <h1 id="login-title">回到<br /><em>没有公开的房间</em></h1>
-          <p className="login-copy">这里管理日志、笔记、照片、音乐与想法。保存后，GitHub 会让网站重新部署。</p>
+          <p className="admin-eyebrow">ZHANBO.ART / DASHBOARD</p>
+          <h1 id="login-title">登录管理后台</h1>
+          <p className="login-copy">管理日志、笔记、照片、音乐与想法。</p>
           <form onSubmit={handleLogin} className="login-form">
             <label htmlFor="admin-password">管理员密码</label>
             <input id="admin-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required autoFocus />
             {error ? <p className="admin-alert is-error" role="alert">{error}</p> : null}
-            <button type="submit" disabled={loading}>{loading ? "正在验证……" : "进入私人索引"}</button>
+            <button type="submit" disabled={loading}>{loading ? "正在验证……" : "登录"}</button>
           </form>
           <Link className="back-link" href="/">← 返回公开网站</Link>
         </section>
@@ -329,7 +329,7 @@ export default function UnifiedContentAdmin() {
   return (
     <main className="online-admin">
       <header className="admin-header">
-        <button className="admin-wordmark" type="button" onClick={() => selectView("overview")}>ZHANBO.ART <span>/ INDEX</span></button>
+        <button className="admin-wordmark" type="button" onClick={() => selectView("overview")}>ZHANBO.ART <span>内容管理</span></button>
         <div className="admin-header-status" aria-label="服务连接状态">
           <span className={connection.github.connected ? "is-online" : ""}>GITHUB</span>
           <span className={connection.r2.connected ? "is-online" : ""}>R2</span>
@@ -358,7 +358,7 @@ export default function UnifiedContentAdmin() {
           <button className={view === "assets" ? "is-active" : ""} type="button" onClick={() => selectView("assets")}>
             <span>站点资源</span><small>{assetsLoaded ? String(assets.length).padStart(2, "0") : "··"}</small>
           </button>
-          <p className="index-caption">碎片<br />光线<br />记忆</p>
+          <p className="index-caption">ZHANBO.ART<br />个人内容管理</p>
         </aside>
 
         <section className="admin-desk">
