@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import QuickJournal from "@/components/QuickJournal";
+import ActivityImages, { appendActivityImages, type ActivityImage } from "@/components/ActivityImages";
 import { CONTENT_TYPES, CONTENT_TYPE_META } from "@/lib/content-model";
 import type { ContentType, Visibility } from "@/lib/content-model";
 import "./admin.css";
@@ -19,6 +20,7 @@ type ContentRecord = {
   tags: string[];
   visibility: Visibility;
   image: string;
+  images?: string[];
   audio: string;
   albumArt: string;
   artist: string;
@@ -185,7 +187,7 @@ export default function UnifiedContentAdmin() {
     setAssetsLoaded(false);
   }
 
-  async function handleSave(event: FormEvent<HTMLFormElement>) {
+  async function handleSave(event: FormEvent<HTMLFormElement>, activityImages?: ActivityImage[]) {
     event.preventDefault();
     if (!editor) return;
     setError("");
@@ -193,6 +195,7 @@ export default function UnifiedContentAdmin() {
     setLoading(true);
     try {
       const formData = new FormData(event.currentTarget);
+      if (activityImages) appendActivityImages(formData, activityImages);
       const endpoint = editor.entry
         ? `/api/admin/content/${editor.entry.type}/${encodeURIComponent(editor.entry.slug)}`
         : "/api/admin/content";
@@ -562,12 +565,14 @@ function ContentEditor({
   canSave: boolean;
   mediaConnected: boolean;
   onClose: () => void;
-  onSave: (event: FormEvent<HTMLFormElement>) => void;
+  onSave: (event: FormEvent<HTMLFormElement>, activityImages?: ActivityImage[]) => void;
 }) {
   const { type, entry } = state;
   const isPhoto = type === "photos";
   const isMusic = type === "music";
   const isActivity = type === "notes";
+  const [activityImages, setActivityImages] = useState<ActivityImage[]>(() =>
+    (entry?.images || (entry?.image ? [entry.image] : [])).map((url) => ({ url })));
   return (
     <div className="editor-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <aside className="content-editor" role="dialog" aria-modal="true" aria-labelledby="editor-title">
@@ -578,7 +583,7 @@ function ContentEditor({
           </div>
           <button type="button" onClick={onClose} disabled={loading} aria-label="关闭编辑器">×</button>
         </header>
-        <form className="editor-form" onSubmit={onSave}>
+        <form className="editor-form" onSubmit={(event) => onSave(event, isActivity ? activityImages : undefined)}>
           <input type="hidden" name="type" value={type} />
           <div className="editor-fields">
             {!isActivity ? <>
@@ -600,7 +605,9 @@ function ContentEditor({
               </>
             ) : null}
 
-            {!isPhoto && !isMusic ? (
+            {isActivity ? <div className="field-wide"><ActivityImages images={activityImages} onChange={setActivityImages} disabled={loading} canUpload={mediaConnected} /></div> : null}
+
+            {!isPhoto && !isMusic && !isActivity ? (
               <MediaFields label="配图（可选）" urlName="image" fileName="imageFile" currentUrl={entry?.image || ""} accept="image/jpeg,image/png,image/webp,image/gif,image/avif" disabled={!mediaConnected} />
             ) : null}
 

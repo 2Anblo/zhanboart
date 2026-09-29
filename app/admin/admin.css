@@ -223,3 +223,12 @@
 @media (prefers-reduced-motion: reduce) {
   .editor-backdrop, .content-editor { animation: none; }
 }
+
+.activity-image-picker { margin-top: 14px; }
+.activity-image-previews { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.activity-image-previews:empty { display: none; }
+.activity-image-previews > div { position: relative; min-width: 0; }
+.activity-image-previews img { display: block; width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+.activity-image-picker button { padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; background: white; color: #334155; }
+.activity-image-previews button { position: absolute; right: 6px; bottom: 6px; }
+.activity-image-limit { display: inline-block; margin: 8px 0 8px 12px; color: #64748b; font-size: 12px; }
