@@ -4,6 +4,23 @@
 
 // --- Site ---
 
+export const quickJournalConfig = {
+  heading: "随手记",
+  placeholder: "这一刻，想留下什么……",
+  addImage: "＋ 添加图片",
+  replaceImage: "更换图片",
+  removeImage: "移除图片",
+  preview: "待发布的图片",
+  publicNote: "公开到日志 · 日期自动记录",
+  noMedia: "图片上传暂不可用",
+  publish: "发布",
+  sending: "正在发布……",
+  photoTitle: "一张照片",
+  invalidImage: "请选择 JPG、PNG、WebP、GIF 或 AVIF 图片。",
+  largeImage: "请选择 4 MB 以内的图片。",
+  failed: "发布失败，文字和图片已保留，请重试。",
+};
+
 export interface SiteConfig {
   language: string
   brandName: string

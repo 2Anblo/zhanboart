@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import QuickJournal from "@/components/QuickJournal";
 import { CONTENT_TYPES, CONTENT_TYPE_META } from "@/lib/content-model";
 import type { ContentType, Visibility } from "@/lib/content-model";
 import "./admin.css";
@@ -231,6 +232,24 @@ export default function UnifiedContentAdmin() {
     }
   }
 
+  async function publishQuickJournal(formData: FormData) {
+    setLoading(true);
+    setMessage("");
+    setError("");
+    try {
+      const response = await fetch("/api/admin/content", { method: "POST", body: formData });
+      const data = await response.json() as { entry?: ContentRecord; error?: string };
+      if (!response.ok) throw new Error(data.error || "发布失败，请重试。");
+      if (data.entry) {
+        const entry = data.entry;
+        setEntries((current) => [entry, ...current].sort((a, b) => b.date.localeCompare(a.date)));
+      }
+      setMessage("日志已保存，网站更新完成后就能看到。可以继续写下一条。");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleAssetUpload(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
@@ -369,6 +388,11 @@ export default function UnifiedContentAdmin() {
           ) : null}
           {message ? <div className="admin-alert is-success" role="status">{message}</div> : null}
           {error ? <div className="admin-alert is-error" role="alert">{error}</div> : null}
+
+          <div hidden={view !== "overview" && view !== "journal"}>
+            <QuickJournal canPublish={connection.github.connected} mediaConnected={connection.r2.connected}
+              busy={loading} onPublish={publishQuickJournal} />
+          </div>
 
           {view === "overview" ? (
             <Overview entries={entries} counts={counts} canWrite={connection.github.connected} onOpen={(entry) => setEditor({ type: entry.type, entry })} onCreate={(type) => setEditor({ type })} />
