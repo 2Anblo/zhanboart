@@ -17,6 +17,7 @@ export interface ContentEntry {
   mood?: string;
   location?: string;
   image?: string;
+  images?: string[];
   caption?: string;
   audio?: string;
   albumArt?: string;
@@ -56,6 +57,7 @@ function readType(type: ContentType): ContentEntry[] {
         mood: data.mood ? String(data.mood) : undefined,
         location: data.location ? String(data.location) : undefined,
         image: data.image ? String(data.image) : undefined,
+        images: Array.isArray(data.images) ? data.images.map(String) : undefined,
         caption: data.caption ? String(data.caption) : undefined,
         audio: data.audio ? String(data.audio) : undefined,
         albumArt: data.albumArt ? String(data.albumArt) : undefined,

@@ -895,3 +895,10 @@ html.light .menu-page__side {
   .activity-entry { padding: 1.5rem 0; }
   .activity-text { font-size: .95rem; }
 }
+
+.activity-images { margin-top: 1.25rem; }
+.activity-images .activity-image { margin-top: 0; }
+.activity-images.is-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.activity-images.is-grid a { min-width: 0; }
+.activity-images.is-grid .activity-image { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; }
+.activity-images a:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }

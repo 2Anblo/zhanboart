@@ -39,6 +39,8 @@ export type OnlineContent = {
   tags: string[];
   visibility: Visibility;
   image: string;
+  images: string[];
+  imageR2Keys: string[];
   audio: string;
   albumArt: string;
   artist: string;
@@ -296,6 +298,8 @@ function contentFromMarkdown(type: ContentType, raw: string, fileName: string): 
     tags: parseTags(data.tags),
     visibility,
     image: String(data.image || ""),
+    images: Array.isArray(data.images) ? data.images.map(String) : data.image ? [String(data.image)] : [],
+    imageR2Keys: Array.isArray(data.imageR2Keys) ? data.imageR2Keys.map(String) : data.image ? [imageR2Key] : [],
     audio: String(data.audio || ""),
     albumArt: String(data.albumArt || ""),
     artist: String(data.artist || ""),
@@ -303,7 +307,7 @@ function contentFromMarkdown(type: ContentType, raw: string, fileName: string): 
     imageR2Key,
     audioR2Key,
     albumArtR2Key,
-    managed: Boolean(imageR2Key || audioR2Key || albumArtR2Key),
+    managed: Boolean(imageR2Key || audioR2Key || albumArtR2Key || (Array.isArray(data.imageR2Keys) && data.imageR2Keys.some(Boolean))),
   };
 }
 
@@ -445,10 +449,39 @@ export async function saveRemoteContent(
   let audioR2Key = audio === existing?.audio ? existing.audioR2Key : "";
   let albumArtR2Key = albumArt === existing?.albumArt ? existing.albumArtR2Key : "";
   const uploaded: ManagedMedia[] = [];
+  let images = type === "notes" ? existing?.images || [] : [];
+  let imageR2Keys = type === "notes" ? existing?.imageR2Keys || [] : [];
+  const activityFiles = form.getAll("imageFiles").filter((value): value is File => value instanceof File && value.size > 0);
+  if (type === "notes") {
+    if (form.has("retainedImages")) {
+      const retained: unknown = JSON.parse(String(form.get("retainedImages")));
+      if (!Array.isArray(retained) || retained.some((url) => typeof url !== "string" || !images.includes(url)) || new Set(retained).size !== retained.length) {
+        throw new Error("保留的图片无效，请刷新后重试");
+      }
+      imageR2Keys = retained.map((url) => imageR2Keys[images.indexOf(url)] || "");
+      images = retained;
+    }
+    const legacyFile = form.get("imageFile");
+    if (legacyFile instanceof File && legacyFile.size > 0) activityFiles.push(legacyFile);
+    if (images.length + activityFiles.length > 9) throw new Error("每条动态最多 9 张图片");
+    if (activityFiles.some((file) => !IMAGE_TYPES.has(file.type))) throw new Error("图片格式不支持");
+    if (activityFiles.reduce((sum, file) => sum + file.size, 0) > 4 * 1024 * 1024) throw new Error("本次上传的图片合计不能超过 4 MB");
+    if (!form.has("retainedImages") && !images.length && image) { images = [image]; imageR2Keys = [imageR2Key]; }
+    if (!body.trim() && !images.length && !activityFiles.length) throw new Error("请写点文字或添加图片");
+  }
 
   try {
+    if (type === "notes") {
+      images = [...images]; imageR2Keys = [...imageR2Keys];
+      for (const file of activityFiles) {
+        const result = await uploadManagedMedia(file, { type, date, slug, kind: "image" });
+        uploaded.push(result); images.push(result.url); imageR2Keys.push(result.key);
+      }
+      image = images[0] || "";
+      imageR2Key = imageR2Keys[0] || "";
+    }
     const imageFile = form.get("imageFile");
-    if (imageFile instanceof File && imageFile.size > 0) {
+    if (type !== "notes" && imageFile instanceof File && imageFile.size > 0) {
       const result = await uploadManagedMedia(imageFile, { type, date, slug, kind: "image" });
       uploaded.push(result);
       image = result.url;
@@ -487,6 +520,8 @@ export async function saveRemoteContent(
       mood: formText(form, "mood", existing?.mood || ""),
       location: formText(form, "location", existing?.location || ""),
       image,
+      images: type === "notes" ? images : undefined,
+      imageR2Keys: type === "notes" ? imageR2Keys : undefined,
       caption,
       audio,
       albumArt,
@@ -511,9 +546,9 @@ export async function saveRemoteContent(
     });
 
     const warnings: string[] = [];
-    const staleKeys = [existing?.imageR2Key, existing?.audioR2Key, existing?.albumArtR2Key]
+    const staleKeys = [existing?.imageR2Key, existing?.audioR2Key, existing?.albumArtR2Key, ...(existing?.imageR2Keys || [])]
       .filter((key): key is string => Boolean(key))
-      .filter((key) => ![imageR2Key, audioR2Key, albumArtR2Key].includes(key));
+      .filter((key) => ![imageR2Key, audioR2Key, albumArtR2Key, ...imageR2Keys].includes(key));
     for (const key of new Set(staleKeys)) {
       try {
         await deleteR2Object(key);
@@ -545,7 +580,7 @@ export async function deleteRemoteContent(type: ContentType, slug: string): Prom
   });
 
   const warnings: string[] = [];
-  const mediaKeys = new Set([entry.imageR2Key, entry.audioR2Key, entry.albumArtR2Key].filter(Boolean));
+  const mediaKeys = new Set([entry.imageR2Key, entry.audioR2Key, entry.albumArtR2Key, ...entry.imageR2Keys].filter(Boolean));
   for (const key of mediaKeys) {
     try {
       await deleteR2Object(key);
