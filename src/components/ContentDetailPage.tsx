@@ -5,10 +5,18 @@ import ContentNav from "@/components/ContentNav";
 import MarkdownRenderer from "@/components/markdown/MarkdownRenderer";
 import MusicPlayer from "@/components/MusicPlayer";
 import ProgressiveBlurFade from "@/components/ProgressiveBlurFade";
+import ActivityEntry from "@/components/ActivityEntry";
 
 export default function ContentDetailPage({ type, slug }: { type: ContentType; slug: string }) {
   const entry = getEntry(type, slug);
   if (!entry) notFound();
+
+  if (type === "notes") return (
+    <main className="content-shell">
+      <ContentNav />
+      <div className="content-inner activity-feed"><ActivityEntry entry={entry} /></div>
+    </main>
+  );
 
   return (
     <article className="content-shell">

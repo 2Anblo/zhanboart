@@ -11,6 +11,7 @@ export interface ContentEntry {
   slug: string;
   title: string;
   date: string;
+  createdAt?: string;
   excerpt: string;
   tags: string[];
   mood?: string;
@@ -47,8 +48,9 @@ function readType(type: ContentType): ContentEntry[] {
       return {
         type,
         slug,
-        title: String(data.title || slug),
+        title: type === "notes" ? "" : String(data.title || slug),
         date: String(data.date || ""),
+        createdAt: data.createdAt ? String(data.createdAt) : undefined,
         excerpt: String(data.excerpt || data.caption || ""),
         tags: normalizeTags(data.tags),
         mood: data.mood ? String(data.mood) : undefined,
@@ -62,7 +64,7 @@ function readType(type: ContentType): ContentEntry[] {
         content,
       } satisfies ContentEntry;
     })
-    .sort((a, b) => b.date.localeCompare(a.date));
+    .sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || "").localeCompare(a.createdAt || ""));
 }
 
 export function getEntries(type: ContentType, includeDrafts = false): ContentEntry[] {

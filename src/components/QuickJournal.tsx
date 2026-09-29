@@ -39,14 +39,12 @@ export default function QuickJournal({ canPublish, mediaConnected, busy, onPubli
     const now = new Date();
     const date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
     const text = body.trim();
-    const firstLine = text.split(/\r?\n/).find((line) => line.trim()) || "";
     const data = new FormData();
-    data.set("type", "journal");
+    data.set("type", "notes");
     data.set("body", text);
-    data.set("title", Array.from(firstLine).slice(0, 32).join("") || `${date} · ${copy.photoTitle}`);
     data.set("excerpt", Array.from(text.replace(/\s+/g, " ")).slice(0, 120).join(""));
     data.set("date", date);
-    data.set("slug", `journal-${date}-${crypto.randomUUID()}`);
+    data.set("slug", `activity-${date}-${crypto.randomUUID()}`);
     data.set("visibility", "public");
     if (image) data.set("imageFile", image.file);
     try {

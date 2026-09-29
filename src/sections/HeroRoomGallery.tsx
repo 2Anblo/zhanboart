@@ -7,7 +7,7 @@ type HeroEntry = Omit<ContentEntry, "content">;
 
 const typeLabels: Record<ContentType, string> = {
   journal: "Journal",
-  notes: "Notes",
+  notes: "动态",
   photos: "Photos",
   music: "Music",
   thoughts: "Thoughts",
@@ -52,7 +52,7 @@ export default function HeroRoomGallery({ entries }: { entries: HeroEntry[] }) {
                     {entry.date} / {typeLabels[entry.type]}
                     {entry.mood ? ` / ${entry.mood}` : ""}
                   </span>
-                  <span className="quiet-hero__entry-title">{entry.title}</span>
+                  {entry.type !== "notes" ? <span className="quiet-hero__entry-title">{entry.title}</span> : null}
                   {entry.excerpt ? <span className="quiet-hero__entry-excerpt">{entry.excerpt}</span> : null}
                 </Link>
               ))}

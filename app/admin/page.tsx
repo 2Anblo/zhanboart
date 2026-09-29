@@ -53,7 +53,7 @@ const visibilityLabels: Record<Visibility, string> = {
 const viewLabels: Record<AdminView, { title: string; kicker: string; note: string }> = {
   overview: { title: "内容总览", kicker: "DASHBOARD", note: "发布新日志，查看和管理你的全部内容。" },
   journal: { title: "日志", kicker: "JOURNAL", note: CONTENT_TYPE_META.journal.description },
-  notes: { title: "笔记", kicker: "NOTES", note: CONTENT_TYPE_META.notes.description },
+  notes: { title: "动态", kicker: "ACTIVITY", note: CONTENT_TYPE_META.notes.description },
   photos: { title: "照片", kicker: "PHOTOS", note: CONTENT_TYPE_META.photos.description },
   music: { title: "音乐", kicker: "MUSIC", note: CONTENT_TYPE_META.music.description },
   thoughts: { title: "想法", kicker: "THOUGHTS", note: CONTENT_TYPE_META.thoughts.description },
@@ -67,7 +67,7 @@ function formatBytes(bytes: number): string {
 }
 
 function recordSearchText(entry: ContentRecord): string {
-  return [entry.title, entry.excerpt, entry.caption, entry.artist, entry.location, entry.mood, ...entry.tags]
+  return [entry.title, entry.body, entry.excerpt, entry.caption, entry.artist, entry.location, entry.mood, ...entry.tags]
     .join(" ")
     .toLowerCase();
 }
@@ -213,7 +213,7 @@ export default function UnifiedContentAdmin() {
 
   async function handleDelete(entry: ContentRecord) {
     const mediaNote = entry.managed ? "；它拥有的 R2 媒体也会删除" : "";
-    if (!window.confirm(`确认删除「${entry.title}」？GitHub 记录会被删除${mediaNote}。`)) return;
+    if (!window.confirm(`确认删除「${entry.type === "notes" ? entry.body.slice(0, 32) || "图片动态" : entry.title}」？GitHub 记录会被删除${mediaNote}。`)) return;
     setError("");
     setMessage("");
     setLoading(true);
@@ -244,7 +244,7 @@ export default function UnifiedContentAdmin() {
         const entry = data.entry;
         setEntries((current) => [entry, ...current].sort((a, b) => b.date.localeCompare(a.date)));
       }
-      setMessage("日志已保存，网站更新完成后就能看到。可以继续写下一条。");
+      setMessage("动态已保存，网站更新完成后就能看到。可以继续写下一条。");
     } finally {
       setLoading(false);
     }
@@ -310,7 +310,7 @@ export default function UnifiedContentAdmin() {
         <section className="login-card" aria-labelledby="login-title">
           <p className="admin-eyebrow">ZHANBO.ART / DASHBOARD</p>
           <h1 id="login-title">登录管理后台</h1>
-          <p className="login-copy">管理日志、笔记、照片、音乐与想法。</p>
+          <p className="login-copy">管理日志、动态、照片、音乐与想法。</p>
           <form onSubmit={handleLogin} className="login-form">
             <label htmlFor="admin-password">管理员密码</label>
             <input id="admin-password" type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" required autoFocus />
@@ -389,7 +389,7 @@ export default function UnifiedContentAdmin() {
           {message ? <div className="admin-alert is-success" role="status">{message}</div> : null}
           {error ? <div className="admin-alert is-error" role="alert">{error}</div> : null}
 
-          <div hidden={view !== "overview" && view !== "journal"}>
+          <div hidden={view !== "overview" && view !== "notes"}>
             <QuickJournal canPublish={connection.github.connected} mediaConnected={connection.r2.connected}
               busy={loading} onPublish={publishQuickJournal} />
           </div>
@@ -506,14 +506,14 @@ function ContentLedger({
             <span className="ledger-date">{entry.date || "未注明日期"}</span>
             <span className="ledger-type">{CONTENT_TYPE_META[entry.type].label}</span>
             <span className="ledger-title">
-              <strong>{entry.title}</strong>
-              <small>{entry.excerpt || entry.caption || entry.artist || "没有摘要"}</small>
+              <strong>{entry.type === "notes" ? entry.body || "图片动态" : entry.title}</strong>
+              {entry.type !== "notes" ? <small>{entry.excerpt || entry.caption || entry.artist || "没有摘要"}</small> : null}
             </span>
             <span className={`visibility-mark is-${entry.visibility}`}>{visibilityLabels[entry.visibility]}</span>
           </button>
           {!compact && onDelete ? (
             <div className="ledger-actions">
-              <Link href={`/${entry.type}/${entry.slug}`} target="_blank" aria-label={`打开 ${entry.title}`}>↗</Link>
+              <Link href={`/${entry.type}/${entry.slug}`} target="_blank" aria-label={`打开 ${entry.type === "notes" ? "动态" : entry.title}`}>↗</Link>
               <button type="button" onClick={() => onDelete(entry)} disabled={loading}>删除</button>
             </div>
           ) : null}
@@ -567,19 +567,21 @@ function ContentEditor({
   const { type, entry } = state;
   const isPhoto = type === "photos";
   const isMusic = type === "music";
+  const isActivity = type === "notes";
   return (
     <div className="editor-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <aside className="content-editor" role="dialog" aria-modal="true" aria-labelledby="editor-title">
         <header>
           <div>
             <p className="admin-eyebrow">{entry ? "EDIT RECORD" : "NEW RECORD"} / {type.toUpperCase()}</p>
-            <h2 id="editor-title">{entry ? entry.title : `新建${CONTENT_TYPE_META[type].singular}`}</h2>
+            <h2 id="editor-title">{isActivity ? (entry ? "编辑动态" : "发布动态") : entry ? entry.title : `新建${CONTENT_TYPE_META[type].singular}`}</h2>
           </div>
           <button type="button" onClick={onClose} disabled={loading} aria-label="关闭编辑器">×</button>
         </header>
         <form className="editor-form" onSubmit={onSave}>
           <input type="hidden" name="type" value={type} />
           <div className="editor-fields">
+            {!isActivity ? <>
             <label className="field-wide">标题<input name="title" defaultValue={entry?.title || ""} placeholder="这一刻叫什么" required autoFocus /></label>
             <label>日期<input name="date" type="date" defaultValue={entry?.date || new Date().toISOString().slice(0, 10)} required /></label>
             <label>固定链接<input name="slug" defaultValue={entry?.slug || ""} placeholder="留空则自动生成" readOnly={Boolean(entry)} /></label>
@@ -587,6 +589,9 @@ function ContentEditor({
             <label>地点<input name="location" defaultValue={entry?.location || ""} placeholder="Shanghai" /></label>
             <label>心情<input name="mood" defaultValue={entry?.mood || ""} placeholder="quiet" /></label>
             <label className="field-wide">标签<input name="tags" defaultValue={entry?.tags.join(", ") || ""} placeholder="night, memory, room" /></label>
+            </> : null}
+
+            {isActivity ? <label className="field-wide body-field">文字<textarea name="body" rows={8} defaultValue={entry?.body || ""} placeholder="这一刻，想留下什么……" autoFocus /></label> : null}
 
             {isPhoto ? (
               <>
@@ -607,7 +612,7 @@ function ContentEditor({
               </>
             ) : null}
 
-            <label className="field-wide body-field">正文<textarea name="body" rows={14} defaultValue={entry?.body || ""} placeholder="支持 Markdown。写下那些不需要被总结的东西……" /></label>
+            {!isActivity ? <label className="field-wide body-field">正文<textarea name="body" rows={14} defaultValue={entry?.body || ""} placeholder="支持 Markdown。写下那些不需要被总结的东西……" /></label> : null}
             <label>可见性
               <select name="visibility" defaultValue={entry?.visibility || "public"}>
                 <option value="public">公开</option>

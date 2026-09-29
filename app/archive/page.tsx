@@ -20,8 +20,8 @@ export default function ArchivePage() {
             <div className="entry-list">
               {entries.filter((entry) => entry.date.startsWith(year)).map((entry) => (
                 <Link key={`${entry.type}-${entry.slug}`} href={`/${entry.type}/${entry.slug}`} className="entry-card">
-                  <div className="entry-meta">{entry.date} / {entry.type}</div>
-                  <h2>{entry.title}</h2>
+                  <div className="entry-meta">{entry.date} / {entry.type === "notes" ? "动态" : entry.type}</div>
+                  {entry.type === "notes" ? <p>{entry.content || "图片动态"}</p> : <h2>{entry.title}</h2>}
                 </Link>
               ))}
             </div>
