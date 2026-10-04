@@ -87,14 +87,31 @@ export default function ActivityGallery({ images, caption }: { images: string[];
           if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
           else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
         }}
-        onClick={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
+        onPointerDown={() => { suppressClick.current = false; }}
+        onClick={(event) => {
+          if (suppressClick.current) { suppressClick.current = false; return; }
+          const target = event.target;
+          if (!(target instanceof Element) || target.closest("button")) return;
+          if (target instanceof HTMLImageElement) {
+            // object-fit leaves empty space inside the img element; only the photo itself stays open.
+            if (!target.naturalWidth || !target.naturalHeight) return;
+            const rect = target.getBoundingClientRect();
+            const scale = Math.min(rect.width / target.naturalWidth, rect.height / target.naturalHeight);
+            const width = target.naturalWidth * scale;
+            const height = target.naturalHeight * scale;
+            const left = rect.left + (rect.width - width) / 2;
+            const top = rect.top + (rect.height - height) / 2;
+            if (event.clientX >= left && event.clientX <= left + width && event.clientY >= top && event.clientY <= top + height) return;
+          }
+          setOpen(false);
+        }}>
         {open ? <>
           <div className="activity-lightbox-toolbar">
             <span role="status" aria-live="polite">{active + 1} / {count}</span>
             <button type="button" onClick={() => setOpen(false)} aria-label="关闭大图" autoFocus>×</button>
           </div>
           <div className="activity-lightbox-stage" onTouchStart={startTouch} onTouchEnd={endTouch}
-            onTouchCancel={() => { touch.current = null; }} onClick={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
+            onTouchCancel={() => { touch.current = null; }}>
             <img key={active} src={images[active]} alt={caption || `动态配图 ${active + 1}`} width={1600} height={1200} draggable={false} />
           </div>
           {multiple ? <div className="activity-lightbox-controls">
