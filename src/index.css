@@ -899,14 +899,14 @@ html.light .menu-page__side {
 .activity-gallery { --card-surface: #22221f; --card-line: #ffffff20; margin-top: 1.5rem; }
 html.light .activity-gallery { --card-surface: #fffdf8; --card-line: #2926261a; }
 .activity-deck { position: relative; height: clamp(250px, 52vw, 480px); isolation: isolate; touch-action: pan-y pinch-zoom; }
-.activity-card { position: absolute; inset: 12px 14%; display: grid; place-items: center; padding: 8px; border: 1px solid var(--card-line); border-radius: 12px; background: var(--card-surface); box-shadow: 0 12px 28px #00000024; cursor: zoom-in; transform: translateX(0) rotate(0); opacity: 1; transition: transform 420ms cubic-bezier(.22,1,.36,1), opacity 300ms ease, filter 300ms ease; }
-.activity-card img { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; border-radius: 6px; pointer-events: none; }
+.activity-card { position: absolute; inset: 12px 14%; display: grid; place-items: center; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; cursor: zoom-in; transform: translateX(0) rotate(0); opacity: 1; transition: transform 420ms cubic-bezier(.22,1,.36,1), opacity 300ms ease, filter 300ms ease; }
+.activity-card img { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; border-radius: 0; pointer-events: none; }
 .activity-card.is-center { z-index: 3; }
 .activity-card.is-left { z-index: 1; transform: translateX(-18%) rotate(-7deg) scale(.88); filter: brightness(.72); cursor: pointer; }
 .activity-card.is-right { z-index: 2; transform: translateX(18%) rotate(7deg) scale(.88); filter: brightness(.72); cursor: pointer; }
 html.light .activity-card:is(.is-left, .is-right) { filter: brightness(.94); }
 .activity-card.is-hidden { z-index: 0; transform: scale(.8); opacity: 0; visibility: hidden; pointer-events: none; }
-.activity-gallery.is-single .activity-card { inset-inline: 0; box-shadow: 0 6px 20px #00000014; }
+.activity-gallery.is-single .activity-card { inset-inline: 0; }
 .activity-gallery-controls { display: flex; align-items: center; justify-content: center; gap: 20px; margin-top: 14px; }
 .activity-gallery-controls span { min-width: 44px; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; opacity: .7; }
 .activity-gallery-controls button { width: 42px; height: 42px; border: 1px solid var(--card-line); border-radius: 50%; background: transparent; color: inherit; cursor: pointer; }
@@ -924,7 +924,7 @@ html.light .activity-card:is(.is-left, .is-right) { filter: brightness(.94); }
 .activity-lightbox-controls { flex: none; display: flex; justify-content: center; gap: 24px; padding-bottom: env(safe-area-inset-bottom); }
 @keyframes activity-photo-in { from { opacity: .5; transform: scale(.985); } to { opacity: 1; transform: scale(1); } }
 @media (max-width: 600px) {
-  .activity-card { padding: 5px; border-radius: 9px; }
+  .activity-card { padding: 0; }
   .activity-lightbox { padding: 12px; }
 }
 @media (prefers-reduced-motion: reduce) {
