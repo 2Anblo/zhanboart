@@ -73,9 +73,7 @@ export default function ActivityGallery({ images, caption }: { images: string[];
         })}
       </div>
       {multiple ? <div className="activity-gallery-controls">
-        <button type="button" aria-label="上一张图片" onClick={() => move(-1)}>←</button>
         <span role="status" aria-live="polite" aria-atomic="true">{active + 1} / {count}</span>
-        <button type="button" aria-label="下一张图片" onClick={() => move(1)}>→</button>
       </div> : null}
       <dialog ref={dialog} className="activity-lightbox" aria-label="查看动态大图" onClose={() => {
         setOpen(false);
