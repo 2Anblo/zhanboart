@@ -902,6 +902,8 @@ html.light .activity-gallery { --card-surface: #fffdf8; --card-line: #2926261a; 
 .activity-card { position: absolute; inset: 12px 14%; display: grid; place-items: center; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; cursor: default; transform: translateX(0) rotate(0); opacity: 1; transition: transform 420ms cubic-bezier(.22,1,.36,1), opacity 300ms ease, filter 300ms ease; }
 .activity-card img { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; border-radius: 0; pointer-events: none; }
 .activity-card.is-center { z-index: 3; }
+.activity-gallery.is-previewing .activity-card.is-center { opacity: 0; transition-duration: 120ms; }
+.activity-gallery.is-preview-releasing .activity-card.is-center { animation: activity-source-return 300ms ease both; }
 .activity-card.is-left { z-index: 1; transform: translateX(-18%) rotate(-7deg) scale(.88); filter: brightness(.72); cursor: pointer; }
 .activity-card.is-right { z-index: 2; transform: translateX(18%) rotate(7deg) scale(.88); filter: brightness(.72); cursor: pointer; }
 html.light .activity-card:is(.is-left, .is-right) { filter: brightness(.94); }
@@ -918,11 +920,12 @@ html.light .activity-card:is(.is-left, .is-right) { filter: brightness(.94); }
 @keyframes hold-backdrop-out { to { background: #0d0e0c00; } }
 @keyframes hold-photo-in { from { opacity: .35; transform: scale(.58); } to { opacity: 1; transform: scale(1); } }
 @keyframes hold-photo-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(.58); } }
+@keyframes activity-source-return { from { opacity: 0; } to { opacity: 1; } }
 @media (max-width: 600px) {
   .activity-card { padding: 0; }
   .activity-hold-preview { padding: 5vh 5vw; }
 }
 @media (prefers-reduced-motion: reduce) {
   .activity-card { transition: none; }
-  .activity-hold-preview, .activity-hold-preview img { animation-duration: 1ms; }
+  .activity-hold-preview, .activity-hold-preview img, .activity-gallery.is-preview-releasing .activity-card.is-center { animation-duration: 1ms; }
 }

@@ -53,7 +53,7 @@ export default function ActivityGallery({ images, caption }: { images: string[];
   }
 
   return (
-    <section className={`activity-gallery ${multiple ? "has-stack" : "is-single"}`} aria-label="动态图片" aria-roledescription="轮播图"
+    <section className={`activity-gallery ${multiple ? "has-stack" : "is-single"} ${preview === "holding" ? "is-previewing" : ""} ${preview === "releasing" ? "is-preview-releasing" : ""}`} aria-label="动态图片" aria-roledescription="轮播图"
       onKeyDown={(event) => {
         if (!multiple) return;
         if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
