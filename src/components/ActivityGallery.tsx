@@ -1,26 +1,30 @@
 "use client";
 
 import { useEffect, useRef, useState, type TouchEvent } from "react";
+import { createPortal } from "react-dom";
 
 export default function ActivityGallery({ images, caption }: { images: string[]; caption?: string }) {
   const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
-  const dialog = useRef<HTMLDialogElement>(null);
+  const expanded = useRef<HTMLButtonElement>(null);
+  const activeCard = useRef<HTMLButtonElement>(null);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
   const count = images.length;
   const multiple = count > 1;
 
   function move(direction: number) { setActive((index) => (index + direction + count) % count); }
+  function closeCanvas(restoreFocus = false) {
+    setOpen(false);
+    if (restoreFocus) requestAnimationFrame(() => activeCard.current?.focus({ preventScroll: true }));
+  }
 
   useEffect(() => {
     if (!open) return;
-    const element = dialog.current;
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-    element?.showModal();
+    expanded.current?.focus({ preventScroll: true });
     return () => {
-      element?.close();
       document.body.style.overflow = overflow;
     };
   }, [open]);
@@ -38,6 +42,7 @@ export default function ActivityGallery({ images, caption }: { images: string[];
     if (multiple && Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.3) {
       suppressClick.current = true;
       move(dx < 0 ? 1 : -1);
+      window.setTimeout(() => { suppressClick.current = false; }, 250);
     }
   }
 
@@ -61,6 +66,7 @@ export default function ActivityGallery({ images, caption }: { images: string[];
         {images.map((src, index) => {
           const slot = position(index);
           return <button key={`${src}-${index}`} type="button" className={`activity-card is-${slot}`}
+            ref={slot === "center" ? activeCard : undefined}
             aria-label={slot === "center" ? `放大图片 ${index + 1}` : `切换到图片 ${index + 1}`}
             aria-hidden={slot === "hidden"} tabIndex={slot === "center" ? 0 : -1}
             onPointerDown={(event) => { if (event.pointerType === "mouse") suppressClick.current = false; }}
@@ -75,51 +81,26 @@ export default function ActivityGallery({ images, caption }: { images: string[];
       {multiple ? <div className="activity-gallery-controls">
         <span role="status" aria-live="polite" aria-atomic="true">{active + 1} / {count}</span>
       </div> : null}
-      <dialog ref={dialog} className="activity-lightbox" aria-label="查看动态大图" onClose={() => {
-        setOpen(false);
-        dialog.current?.parentElement?.querySelector<HTMLButtonElement>(".activity-card.is-center")?.focus({ preventScroll: true });
-      }}
-        onKeyDown={(event) => {
-          if (event.key !== "Tab") return;
-          const buttons = event.currentTarget.querySelectorAll<HTMLButtonElement>("button");
-          const first = buttons[0];
-          const last = buttons[buttons.length - 1];
-          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
-          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
-        }}
-        onPointerDown={() => { suppressClick.current = false; }}
-        onClick={(event) => {
-          if (suppressClick.current) { suppressClick.current = false; return; }
-          const target = event.target;
-          if (!(target instanceof Element) || target.closest("button")) return;
-          if (target instanceof HTMLImageElement) {
-            // object-fit leaves empty space inside the img element; only the photo itself stays open.
-            if (!target.naturalWidth || !target.naturalHeight) return;
-            const rect = target.getBoundingClientRect();
-            const scale = Math.min(rect.width / target.naturalWidth, rect.height / target.naturalHeight);
-            const width = target.naturalWidth * scale;
-            const height = target.naturalHeight * scale;
-            const left = rect.left + (rect.width - width) / 2;
-            const top = rect.top + (rect.height - height) / 2;
-            if (event.clientX >= left && event.clientX <= left + width && event.clientY >= top && event.clientY <= top + height) return;
-          }
-          setOpen(false);
-        }}>
-        {open ? <>
-          <div className="activity-lightbox-toolbar">
-            <span role="status" aria-live="polite">{active + 1} / {count}</span>
-            <button type="button" onClick={() => setOpen(false)} aria-label="关闭大图" autoFocus>×</button>
-          </div>
-          <div className="activity-lightbox-stage" onTouchStart={startTouch} onTouchEnd={endTouch}
-            onTouchCancel={() => { touch.current = null; }}>
-            <img key={active} src={images[active]} alt={caption || `动态配图 ${active + 1}`} width={1600} height={1200} draggable={false} />
-          </div>
-          {multiple ? <div className="activity-lightbox-controls">
-            <button type="button" aria-label="上一张大图" onClick={() => move(-1)}>←</button>
-            <button type="button" aria-label="下一张大图" onClick={() => move(1)}>→</button>
-          </div> : null}
-        </> : null}
-      </dialog>
+      {open ? createPortal(
+        <button ref={expanded} type="button" className="activity-cinema-canvas" aria-label="收起大图"
+          onClick={() => {
+            if (suppressClick.current) { suppressClick.current = false; return; }
+            closeCanvas();
+          }} onTouchStart={startTouch} onTouchEnd={(event) => {
+            const before = active;
+            endTouch(event);
+            if (before === active && !suppressClick.current) closeCanvas();
+          }}
+          onKeyDown={(event) => {
+            if (event.key === "Escape") { event.preventDefault(); closeCanvas(true); }
+            if (multiple && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+              event.preventDefault(); move(event.key === "ArrowLeft" ? -1 : 1);
+            }
+          }}>
+          <img key={active} src={images[active]} alt={caption || `动态配图 ${active + 1}`}
+            width={1600} height={1200} draggable={false} />
+          {multiple ? <span aria-hidden="true">{active + 1} / {count}</span> : null}
+        </button>, document.body) : null}
     </section>
   );
 }
