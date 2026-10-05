@@ -5,29 +5,27 @@ import { createPortal } from "react-dom";
 
 export default function ActivityGallery({ images, caption }: { images: string[]; caption?: string }) {
   const [active, setActive] = useState(0);
-  const [open, setOpen] = useState(false);
-  const expanded = useRef<HTMLButtonElement>(null);
-  const activeCard = useRef<HTMLButtonElement>(null);
+  const [preview, setPreview] = useState<"idle" | "holding" | "releasing">("idle");
+  const releaseTimer = useRef<number | undefined>(undefined);
   const touch = useRef<{ x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
   const count = images.length;
   const multiple = count > 1;
 
   function move(direction: number) { setActive((index) => (index + direction + count) % count); }
-  function closeCanvas(restoreFocus = false) {
-    setOpen(false);
-    if (restoreFocus) requestAnimationFrame(() => activeCard.current?.focus({ preventScroll: true }));
+  function beginPreview() {
+    window.clearTimeout(releaseTimer.current);
+    setPreview("holding");
+  }
+  function releasePreview() {
+    setPreview((current) => current === "holding" ? "releasing" : current);
+    window.clearTimeout(releaseTimer.current);
+    releaseTimer.current = window.setTimeout(() => setPreview("idle"), 320);
   }
 
   useEffect(() => {
-    if (!open) return;
-    const overflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    expanded.current?.focus({ preventScroll: true });
-    return () => {
-      document.body.style.overflow = overflow;
-    };
-  }, [open]);
+    return () => window.clearTimeout(releaseTimer.current);
+  }, []);
 
   function startTouch(event: TouchEvent) {
     suppressClick.current = false;
@@ -66,13 +64,29 @@ export default function ActivityGallery({ images, caption }: { images: string[];
         {images.map((src, index) => {
           const slot = position(index);
           return <button key={`${src}-${index}`} type="button" className={`activity-card is-${slot}`}
-            ref={slot === "center" ? activeCard : undefined}
-            aria-label={slot === "center" ? `放大图片 ${index + 1}` : `切换到图片 ${index + 1}`}
+            aria-label={slot === "center" ? `按住预览图片 ${index + 1}` : `切换到图片 ${index + 1}`}
             aria-hidden={slot === "hidden"} tabIndex={slot === "center" ? 0 : -1}
-            onPointerDown={(event) => { if (event.pointerType === "mouse") suppressClick.current = false; }}
+            onPointerDown={(event) => {
+              if (event.pointerType === "mouse") suppressClick.current = false;
+              if (index !== active || event.pointerType === "touch" || event.button !== 0) return;
+              event.preventDefault();
+              event.currentTarget.setPointerCapture(event.pointerId);
+              beginPreview();
+            }}
+            onPointerUp={(event) => {
+              if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+              releasePreview();
+            }}
+            onPointerCancel={releasePreview}
+            onKeyDown={(event) => {
+              if (index === active && event.key === " " && !event.repeat) { event.preventDefault(); beginPreview(); }
+            }}
+            onKeyUp={(event) => {
+              if (index === active && event.key === " ") { event.preventDefault(); releasePreview(); }
+            }}
             onClick={() => {
               if (suppressClick.current) { suppressClick.current = false; return; }
-              if (index === active) setOpen(true); else setActive(index);
+              if (index !== active) setActive(index);
             }}>
             <img src={src} alt={caption || `动态配图 ${index + 1}`} width={960} height={720} loading="lazy" draggable={false} />
           </button>;
@@ -81,26 +95,11 @@ export default function ActivityGallery({ images, caption }: { images: string[];
       {multiple ? <div className="activity-gallery-controls">
         <span role="status" aria-live="polite" aria-atomic="true">{active + 1} / {count}</span>
       </div> : null}
-      {open ? createPortal(
-        <button ref={expanded} type="button" className="activity-cinema-canvas" aria-label="收起大图"
-          onClick={() => {
-            if (suppressClick.current) { suppressClick.current = false; return; }
-            closeCanvas();
-          }} onTouchStart={startTouch} onTouchEnd={(event) => {
-            const before = active;
-            endTouch(event);
-            if (before === active && !suppressClick.current) closeCanvas();
-          }}
-          onKeyDown={(event) => {
-            if (event.key === "Escape") { event.preventDefault(); closeCanvas(true); }
-            if (multiple && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
-              event.preventDefault(); move(event.key === "ArrowLeft" ? -1 : 1);
-            }
-          }}>
+      {preview !== "idle" ? createPortal(
+        <div className={`activity-hold-preview is-${preview}`} aria-hidden="true">
           <img key={active} src={images[active]} alt={caption || `动态配图 ${active + 1}`}
             width={1600} height={1200} draggable={false} />
-          {multiple ? <span aria-hidden="true">{active + 1} / {count}</span> : null}
-        </button>, document.body) : null}
+        </div>, document.body) : null}
     </section>
   );
 }
