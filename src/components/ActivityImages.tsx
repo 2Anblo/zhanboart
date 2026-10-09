@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import ImageDropZone from "./ImageDropZone";
 
 export type ActivityImage = { url: string; file?: File };
 export const ACTIVITY_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/avif"];
@@ -49,10 +50,12 @@ export default function ActivityImages({ images, onChange, disabled, canUpload, 
           onClick={() => { setError(""); onChange(images.filter((_, i) => i !== index)); }}>移除</button>
       </div>)}
     </div>
+    <ImageDropZone disabled={disabled || !canUpload || images.length >= 9} onFiles={add}>
     <input ref={input} type="file" accept={ACTIVITY_IMAGE_TYPES.join(",")} multiple hidden disabled={disabled || !canUpload}
       onChange={(event) => { add(Array.from(event.target.files || [])); event.target.value = ""; }} />
     <button type="button" disabled={disabled || !canUpload || images.length >= 9} onClick={() => input.current?.click()}>＋ 添加图片</button>
     <span className="activity-image-limit">{images.length}/9 · 上传图片合计最多 4 MB</span>
+    </ImageDropZone>
     {error ? <p className="admin-alert is-error" role="alert">{error}</p> : null}
   </div>;
 }

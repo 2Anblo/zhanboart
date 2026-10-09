@@ -1,6 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import ImageDropZone from "@/components/ImageDropZone";
 import Link from "next/link";
 import QuickJournal from "@/components/QuickJournal";
 import ActivityImages, { appendActivityImages, type ActivityImage } from "@/components/ActivityImages";
@@ -657,10 +658,40 @@ function MediaFields({
     <fieldset className="media-fields field-wide">
       <legend>{label}</legend>
       <label>已有地址<input name={urlName} defaultValue={currentUrl} placeholder="/media/example 或 https://…" /></label>
-      <label className={disabled ? "is-disabled" : ""}>上传新文件<input name={fileName} type="file" accept={accept} disabled={disabled} /></label>
+      {accept.startsWith("image/") ? <ImageFileInput name={fileName} accept={accept} disabled={disabled} /> : <label className={disabled ? "is-disabled" : ""}>上传新文件<input name={fileName} type="file" accept={accept} disabled={disabled} /></label>}
       {currentUrl ? <small>保留地址即可继续使用现有文件；选择新文件会替换它。</small> : null}
     </fieldset>
   );
+}
+
+function ImageFileInput({ name, accept, disabled, required = false }: {
+  name: string; accept: string; disabled: boolean; required?: boolean;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState("");
+  return <ImageDropZone disabled={disabled} onFiles={(files) => {
+    if (!files.length) return;
+    if (files.length !== 1 || !accept.split(",").includes(files[0].type)) {
+      setError("请添加一张支持格式的图片。");
+      return;
+    }
+    if (input.current) {
+      const transfer = new DataTransfer();
+      transfer.items.add(files[0]);
+      input.current.files = transfer.files;
+      setError("");
+    }
+  }}>
+    <label>选择图片<input ref={input} name={name} type="file" accept={accept} disabled={disabled} required={required}
+      onChange={(event) => {
+        const file = event.target.files?.[0];
+        if (file && !accept.split(",").includes(file.type)) {
+          event.target.value = "";
+          setError("请选择支持格式的图片。");
+        } else setError("");
+      }} /></label>
+    {error ? <p className="admin-alert is-error" role="alert">{error}</p> : null}
+  </ImageDropZone>;
 }
 
 function AssetLibrary({
@@ -679,7 +710,7 @@ function AssetLibrary({
   return (
     <div className="asset-library">
       <form className="asset-upload" onSubmit={onUpload}>
-        <label>选择图片<input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/svg+xml" required /></label>
+        <ImageFileInput name="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif,image/svg+xml" required disabled={loading || !connected} />
         <label>存放位置<select name="folder" defaultValue="uploads"><option value="uploads">uploads / 新资源</option><option value="gallery">gallery / 画廊</option><option value="hero">hero / 首页</option><option value="rooms">rooms / 房间</option></select></label>
         <button type="submit" disabled={loading || !connected}>上传到 GitHub</button>
       </form>

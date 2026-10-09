@@ -143,6 +143,10 @@
 .media-fields input[type=file] { font-size: 12px; }
 .online-admin input[type=file]::file-selector-button { margin-right: 8px; border: 0; border-radius: 4px; background: #eff6ff; color: #1d4ed8; padding: 5px 8px; cursor: pointer; }
 .media-fields .is-disabled { opacity: .6; }
+.image-drop-zone { min-width: 0; padding: 16px; border: 1px dashed #94a3b8; border-radius: 10px; background: #f8fafc; }
+.image-drop-zone.is-dragging, .image-drop-zone:focus-within { border-color: #2563eb; background: #eff6ff; }
+.image-drop-zone.is-disabled { opacity: .6; }
+.image-drop-hint { display: block; margin-bottom: 12px; color: #475569; font-size: 13px; }
 .media-fields small { grid-column: 1 / -1; color: var(--admin-muted); font-size: 12px; overflow-wrap: anywhere; }
 .editor-form footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--admin-line); }
 .editor-form footer p { max-width: 340px; margin: 0; color: var(--admin-muted); font-size: 12px; }
