@@ -3,6 +3,7 @@ import { isContentType } from "@/lib/content-model";
 import { deleteRemoteContent, saveRemoteContent } from "@/lib/online-photo-admin";
 
 export const runtime = "nodejs";
+export const maxDuration = 300;
 
 type RouteContext = { params: Promise<{ type: string; slug: string }> };
 

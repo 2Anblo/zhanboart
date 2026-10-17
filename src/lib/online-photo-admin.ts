@@ -1,5 +1,5 @@
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
-import { DeleteObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { AbortMultipartUploadCommand, CompleteMultipartUploadCommand, CreateMultipartUploadCommand, DeleteObjectCommand, GetObjectCommand, HeadBucketCommand, PutObjectCommand, S3Client, UploadPartCommand } from "@aws-sdk/client-s3";
 import matter from "gray-matter";
 import { CONTENT_TYPES, isContentType, isVisibility } from "@/lib/content-model";
 import type { ContentType, Visibility } from "@/lib/content-model";
@@ -7,6 +7,78 @@ import type { ContentType, Visibility } from "@/lib/content-model";
 export const MAX_UPLOAD_BYTES = 30 * 1024 * 1024;
 export const MAX_AUDIO_UPLOAD_BYTES = 100 * 1024 * 1024;
 export const ADMIN_COOKIE = "zhanbo_admin_session";
+const ACTIVITY_CHUNK_BYTES = 3 * 1024 * 1024;
+
+type ActivityUpload = { key: string; size: number; mime: string; exp: number };
+
+function readActivityUpload(token: string): ActivityUpload {
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature) throw new Error("上传凭据无效");
+  const expected = Buffer.from(sessionSignature(`activity-upload:${payload}`));
+  const actual = Buffer.from(signature);
+  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) throw new Error("上传凭据无效");
+  const upload = JSON.parse(decode(payload)) as ActivityUpload;
+  if (upload.exp < Date.now()) throw new Error("上传已过期，请重新上传");
+  return upload;
+}
+
+export function startActivityUpload(name: string, mime: string, size: number): string {
+  if (!IMAGE_TYPES.has(mime)) throw new Error("图片格式不支持");
+  if (!Number.isSafeInteger(size) || size <= 0) throw new Error("图片文件无效");
+  const key = `notes/uploads/${randomUUID()}.${extensionFor(name, mime)}`;
+  const payload = encode(JSON.stringify({ key, mime, size, exp: Date.now() + 24 * 60 * 60 * 1000 }));
+  return `${payload}.${sessionSignature(`activity-upload:${payload}`)}`;
+}
+
+export async function writeActivityChunk(token: string, index: number, chunk: File): Promise<void> {
+  const upload = readActivityUpload(token);
+  const count = Math.ceil(upload.size / ACTIVITY_CHUNK_BYTES);
+  if (!Number.isInteger(index) || index < 0 || index >= count || chunk.size !== Math.min(ACTIVITY_CHUNK_BYTES, upload.size - index * ACTIVITY_CHUNK_BYTES)) {
+    throw new Error("图片分块无效，请重试");
+  }
+  await putR2Object(`${upload.key}.chunks/${index}`, chunk, getR2Config());
+}
+
+export async function discardActivityUpload(token: string): Promise<void> {
+  const upload = readActivityUpload(token);
+  for (let index = 0; index < Math.ceil(upload.size / ACTIVITY_CHUNK_BYTES); index++) {
+    await deleteR2Object(`${upload.key}.chunks/${index}`);
+  }
+}
+
+async function finishActivityUpload(token: string): Promise<ManagedMedia> {
+  const upload = readActivityUpload(token);
+  const config = getR2Config();
+  const base = { Bucket: config.bucket, Key: upload.key };
+  const created = await config.client.send(new CreateMultipartUploadCommand({ ...base, ContentType: upload.mime }));
+  if (!created.UploadId) throw new Error("无法创建图片上传");
+  const multipart = { ...base, UploadId: created.UploadId };
+  try {
+    const parts: { PartNumber: number; ETag: string }[] = [];
+    const count = Math.ceil(upload.size / ACTIVITY_CHUNK_BYTES);
+    // Two 3 MiB HTTP chunks form a 6 MiB R2 part (R2 requires at least 5 MiB except the final part).
+    for (let index = 0; index < count; index += 2) {
+      const buffers: Buffer[] = [];
+      for (let offset = index; offset < Math.min(index + 2, count); offset++) {
+        const object = await config.client.send(new GetObjectCommand({ Bucket: config.bucket, Key: `${upload.key}.chunks/${offset}` }));
+        const bytes = await object.Body?.transformToByteArray();
+        if (!bytes || bytes.length !== Math.min(ACTIVITY_CHUNK_BYTES, upload.size - offset * ACTIVITY_CHUNK_BYTES)) throw new Error("图片上传不完整，请重试");
+        buffers.push(Buffer.from(bytes));
+      }
+      const PartNumber = parts.length + 1;
+      const result = await config.client.send(new UploadPartCommand({ ...multipart, PartNumber, Body: Buffer.concat(buffers) }));
+      if (!result.ETag) throw new Error("图片分块合并失败");
+      parts.push({ PartNumber, ETag: result.ETag });
+    }
+    await config.client.send(new CompleteMultipartUploadCommand({ ...multipart, MultipartUpload: { Parts: parts } }));
+    return { key: upload.key, url: publicObjectUrl(config.publicUrl, upload.key) };
+  } catch (error) {
+    await config.client.send(new AbortMultipartUploadCommand(multipart)).catch(() => {});
+    throw error;
+  } finally {
+    await discardActivityUpload(token).catch(() => {});
+  }
+}
 
 export const IMAGE_TYPES = new Set([
   "image/avif",
@@ -453,6 +525,8 @@ export async function saveRemoteContent(
   let images = type === "notes" ? existing?.images || [] : [];
   let imageR2Keys = type === "notes" ? existing?.imageR2Keys || [] : [];
   const activityFiles = form.getAll("imageFiles").filter((value): value is File => value instanceof File && value.size > 0);
+  const activityUploads = type === "notes" ? form.getAll("uploadedImages").map(String) : [];
+  activityUploads.forEach(readActivityUpload);
   if (type === "notes") {
     if (form.has("retainedImages")) {
       const retained: unknown = JSON.parse(String(form.get("retainedImages")));
@@ -464,15 +538,19 @@ export async function saveRemoteContent(
     }
     const legacyFile = form.get("imageFile");
     if (legacyFile instanceof File && legacyFile.size > 0) activityFiles.push(legacyFile);
-    if (images.length + activityFiles.length > 9) throw new Error("每条动态最多 9 张图片");
+    if (images.length + activityFiles.length + activityUploads.length > 9) throw new Error("每条动态最多 9 张图片");
     if (activityFiles.some((file) => !IMAGE_TYPES.has(file.type))) throw new Error("图片格式不支持");
     if (!form.has("retainedImages") && !images.length && image) { images = [image]; imageR2Keys = [imageR2Key]; }
-    if (!body.trim() && !images.length && !activityFiles.length) throw new Error("请写点文字或添加图片");
+    if (!body.trim() && !images.length && !activityFiles.length && !activityUploads.length) throw new Error("请写点文字或添加图片");
   }
 
   try {
     if (type === "notes") {
       images = [...images]; imageR2Keys = [...imageR2Keys];
+      for (const token of activityUploads) {
+        const result = await finishActivityUpload(token);
+        uploaded.push(result); images.push(result.url); imageR2Keys.push(result.key);
+      }
       for (const file of activityFiles) {
         const result = await uploadManagedMedia(file, { type, date, slug, kind: "image" });
         uploaded.push(result); images.push(result.url); imageR2Keys.push(result.key);

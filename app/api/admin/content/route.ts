@@ -3,6 +3,7 @@ import { isContentType } from "@/lib/content-model";
 import { checkAdminConnection, listRemoteContent, saveRemoteContent } from "@/lib/online-photo-admin";
 
 export const runtime = "nodejs";
+export const maxDuration = 300;
 
 export async function GET(request: Request) {
   const unauthorized = await requireOnlineAdmin();

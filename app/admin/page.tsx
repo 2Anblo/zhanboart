@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import ImageDropZone from "@/components/ImageDropZone";
 import Link from "next/link";
 import QuickJournal from "@/components/QuickJournal";
+import { saveAdminContent } from "@/lib/activity-upload-client";
 import ActivityImages, { appendActivityImages, type ActivityImage } from "@/components/ActivityImages";
 import { CONTENT_TYPES, CONTENT_TYPE_META } from "@/lib/content-model";
 import type { ContentType, Visibility } from "@/lib/content-model";
@@ -200,9 +201,7 @@ export default function UnifiedContentAdmin() {
       const endpoint = editor.entry
         ? `/api/admin/content/${editor.entry.type}/${encodeURIComponent(editor.entry.slug)}`
         : "/api/admin/content";
-      const response = await fetch(endpoint, { method: editor.entry ? "PUT" : "POST", body: formData });
-      const data = (await response.json()) as { error?: string; warnings?: string[] };
-      if (!response.ok) throw new Error(data.error || "保存失败");
+      const data = await saveAdminContent<{ warnings?: string[] }>(endpoint, editor.entry ? "PUT" : "POST", formData);
       setEditor(null);
       setMessage(data.warnings?.length
         ? `内容已保存；${data.warnings.join("；")}。`
@@ -241,9 +240,7 @@ export default function UnifiedContentAdmin() {
     setMessage("");
     setError("");
     try {
-      const response = await fetch("/api/admin/content", { method: "POST", body: formData });
-      const data = await response.json() as { entry?: ContentRecord; error?: string };
-      if (!response.ok) throw new Error(data.error || "发布失败，请重试。");
+      const data = await saveAdminContent<{ entry?: ContentRecord }>("/api/admin/content", "POST", formData);
       if (data.entry) {
         const entry = data.entry;
         setEntries((current) => [entry, ...current].sort((a, b) => b.date.localeCompare(a.date)));
