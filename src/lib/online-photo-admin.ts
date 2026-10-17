@@ -387,7 +387,8 @@ async function uploadManagedMedia(
   if (!allowed.has(file.type)) {
     throw new Error(options.kind === "audio" ? "音频仅支持 MP3、M4A、AAC、WAV、FLAC 和 OGG" : "图片仅支持 JPG、PNG、WebP、GIF 和 AVIF");
   }
-  if (file.size > maxBytes) throw new Error(options.kind === "audio" ? "音频不能超过 100 MB" : "图片不能超过 30 MB");
+  const isActivityImage = options.type === "notes" && options.kind === "image";
+  if (!isActivityImage && file.size > maxBytes) throw new Error(options.kind === "audio" ? "音频不能超过 100 MB" : "图片不能超过 30 MB");
   const config = getR2Config();
   const extension = extensionFor(file.name, file.type);
   const key = `${options.type}/${options.date.slice(0, 4)}/${options.date.slice(5, 7)}/${options.slug}-${options.kind}-${randomUUID().slice(0, 8)}.${extension}`;
@@ -465,7 +466,6 @@ export async function saveRemoteContent(
     if (legacyFile instanceof File && legacyFile.size > 0) activityFiles.push(legacyFile);
     if (images.length + activityFiles.length > 9) throw new Error("每条动态最多 9 张图片");
     if (activityFiles.some((file) => !IMAGE_TYPES.has(file.type))) throw new Error("图片格式不支持");
-    if (activityFiles.reduce((sum, file) => sum + file.size, 0) > 4 * 1024 * 1024) throw new Error("本次上传的图片合计不能超过 4 MB");
     if (!form.has("retainedImages") && !images.length && image) { images = [image]; imageR2Keys = [imageR2Key]; }
     if (!body.trim() && !images.length && !activityFiles.length) throw new Error("请写点文字或添加图片");
   }
