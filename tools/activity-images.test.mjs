@@ -43,8 +43,6 @@ test('activity images preserve ownership, reject limits and roll back uploads', 
   assert.equal(edited.date, original.date);
   await assert.rejects(lib.saveRemoteContent(form(10)), /9/);
   await assert.rejects(lib.saveRemoteContent(form(0, ['https://unowned.example/x.png'])), /无效/);
-  const oversized = form(); oversized.append('imageFiles', new File([new Uint8Array(4 * 1024 * 1024 + 1)], 'large.png', { type: 'image/png' }));
-  await assert.rejects(lib.saveRemoteContent(oversized), /4 MB/);
   const before = deleted.length; failWrite = true;
   await assert.rejects(lib.saveRemoteContent(form(2)), /GitHub API/);
   assert.equal(deleted.length, before + 2);
@@ -54,4 +52,10 @@ test('activity images preserve ownership, reject limits and roll back uploads', 
   existing = matter.stringify('legacy', { image: 'https://media.example.com/old.png', imageR2Key: 'old-key', date: '2026-01-01' });
   await lib.saveRemoteContent(form(0, ['https://media.example.com/old.png']), { type: 'notes', slug: 'test' });
   assert.deepEqual(matter(saved).data.images, ['https://media.example.com/old.png']);
+  for (const size of [4 * 1024 * 1024 + 1, 30 * 1024 * 1024 + 1]) {
+    const largeImage = form();
+    largeImage.append('imageFiles', new File([new Uint8Array(size)], 'large.png', { type: 'image/png' }));
+    await lib.saveRemoteContent(largeImage);
+    assert.equal(matter(saved).data.images.length, 1);
+  }
 });
