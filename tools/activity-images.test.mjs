@@ -12,13 +12,40 @@ test('activity images preserve ownership, reject limits and roll back uploads', 
   const deleted = [], uploaded = [];
   class PutObjectCommand { constructor(input) { this.input = input; } }
   class DeleteObjectCommand { constructor(input) { this.input = input; } }
-  class S3Client { async send(command) { (command instanceof PutObjectCommand ? uploaded : deleted).push(command.input.Key); } }
-  const env = { GITHUB_OWNER: 'test', GITHUB_REPO: 'test', GITHUB_TOKEN: 'mock', CLOUDFLARE_ACCOUNT_ID: 'mock', CLOUDFLARE_R2_BUCKET: 'mock', CLOUDFLARE_R2_PUBLIC_URL: 'https://media.example.com', CLOUDFLARE_R2_ACCESS_KEY_ID: 'mock', CLOUDFLARE_R2_SECRET_ACCESS_KEY: 'mock' };
+  class GetObjectCommand { constructor(input) { this.input = input; } }
+  class CreateMultipartUploadCommand { constructor(input) { this.input = input; } }
+  class UploadPartCommand { constructor(input) { this.input = input; } }
+  class CompleteMultipartUploadCommand { constructor(input) { this.input = input; } }
+  class AbortMultipartUploadCommand { constructor(input) { this.input = input; } }
+  const objects = new Map(), multipart = new Map();
+  let aborted = 0;
+  class S3Client {
+    async send(command) {
+      const input = command.input;
+      if (command instanceof PutObjectCommand) { uploaded.push(input.Key); objects.set(input.Key, input.Body); return {}; }
+      if (command instanceof DeleteObjectCommand) { deleted.push(input.Key); objects.delete(input.Key); return {}; }
+      if (command instanceof GetObjectCommand) {
+        if (!objects.has(input.Key)) throw new Error('missing chunk');
+        return { Body: { transformToByteArray: async () => objects.get(input.Key) } };
+      }
+      if (command instanceof CreateMultipartUploadCommand) { multipart.set(input.Key, []); return { UploadId: input.Key }; }
+      if (command instanceof UploadPartCommand) { multipart.get(input.Key).push(input.Body); return { ETag: `part-${input.PartNumber}` }; }
+      if (command instanceof CompleteMultipartUploadCommand) {
+        const parts = multipart.get(input.Key);
+        assert.ok(parts.slice(0, -1).every(part => part.length >= 5 * 1024 * 1024));
+        assert.equal(input.MultipartUpload.Parts.length, parts.length);
+        objects.set(input.Key, Buffer.concat(parts)); multipart.delete(input.Key); return {};
+      }
+      if (command instanceof AbortMultipartUploadCommand) { aborted++; multipart.delete(input.Key); return {}; }
+      throw new Error('unexpected R2 command');
+    }
+  }
+  const env = { ADMIN_SESSION_SECRET: 'test-only-secret', GITHUB_OWNER: 'test', GITHUB_REPO: 'test', GITHUB_TOKEN: 'mock', CLOUDFLARE_ACCOUNT_ID: 'mock', CLOUDFLARE_R2_BUCKET: 'mock', CLOUDFLARE_R2_PUBLIC_URL: 'https://media.example.com', CLOUDFLARE_R2_ACCESS_KEY_ID: 'mock', CLOUDFLARE_R2_SECRET_ACCESS_KEY: 'mock' };
   let model;
   function load(file) {
     const exports = {};
     const code = ts.transpileModule(readFileSync(new URL(file, import.meta.url), 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, esModuleInterop: true, target: ts.ScriptTarget.ES2022 } }).outputText;
-    vm.runInNewContext(code, { exports, Buffer, File, FormData, URL, Date, process: { env }, require: (name) => name === '@/lib/content-model' ? model : name === '@aws-sdk/client-s3' ? { S3Client, PutObjectCommand, DeleteObjectCommand } : require(name), fetch: async (url, init) => {
+    vm.runInNewContext(code, { exports, Buffer, File, FormData, URL, Date, process: { env }, require: (name) => name === '@/lib/content-model' ? model : name === '@aws-sdk/client-s3' ? { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand, CreateMultipartUploadCommand, UploadPartCommand, CompleteMultipartUploadCommand, AbortMultipartUploadCommand } : require(name), fetch: async (url, init) => {
       if (init.method === 'PUT') { if (failWrite) return new Response('failed', { status: 500 }); saved = Buffer.from(JSON.parse(init.body).content, 'base64').toString(); return Response.json({}); }
       if (init.method === 'DELETE') return Response.json({});
       return Response.json(url.includes('.md') ? { name: 'test.md', content: Buffer.from(existing).toString('base64'), sha: 'mock' } : []);
@@ -58,4 +85,31 @@ test('activity images preserve ownership, reject limits and roll back uploads', 
     await lib.saveRemoteContent(largeImage);
     assert.equal(matter(saved).data.images.length, 1);
   }
+  const chunkSize = 3 * 1024 * 1024;
+  const originalBytes = Buffer.alloc(31 * 1024 * 1024 + 7);
+  for (let i = 0; i < originalBytes.length; i++) originalBytes[i] = i % 251;
+  const token = lib.startActivityUpload('original.png', 'image/png', originalBytes.length);
+  await assert.rejects(lib.writeActivityChunk(`${token}tampered`, 0, new File(['x'], 'chunk')), /凭据/);
+  await assert.rejects(lib.writeActivityChunk(token, 0, new File(['x'], 'chunk')), /分块/);
+  for (let offset = 0; offset < originalBytes.length; offset += chunkSize) {
+    await lib.writeActivityChunk(token, offset / chunkSize, new File([originalBytes.subarray(offset, offset + chunkSize)], 'chunk'));
+  }
+  const staged = form(); staged.set('body', ''); staged.append('uploadedImages', token);
+  await lib.saveRemoteContent(staged);
+  const publishedKey = matter(saved).data.imageR2Keys[0];
+  assert.deepEqual(objects.get(publishedKey), originalBytes);
+  assert.equal([...objects.keys()].filter(key => key.includes('.chunks/')).length, 0);
+  const incomplete = lib.startActivityUpload('missing.png', 'image/png', chunkSize + 1);
+  await lib.writeActivityChunk(incomplete, 0, new File([Buffer.alloc(chunkSize)], 'chunk'));
+  const bad = form(); bad.append('uploadedImages', incomplete);
+  await assert.rejects(lib.saveRemoteContent(bad), /missing chunk/);
+  assert.equal(aborted, 1);
+  assert.equal(multipart.size, 0);
+  assert.equal([...objects.keys()].filter(key => key.includes('.chunks/')).length, 0);
+  const failed = lib.startActivityUpload('rollback.png', 'image/png', 1);
+  await lib.writeActivityChunk(failed, 0, new File(['x'], 'chunk'));
+  const failedForm = form(); failedForm.append('uploadedImages', failed);
+  const keysBefore = [...objects.keys()].sort(); failWrite = true;
+  await assert.rejects(lib.saveRemoteContent(failedForm), /GitHub API/);
+  assert.deepEqual([...objects.keys()].sort(), keysBefore.filter(key => !key.includes('.chunks/')));
 });
