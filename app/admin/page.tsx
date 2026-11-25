@@ -195,17 +195,28 @@ export default function UnifiedContentAdmin() {
     setError("");
     setMessage("");
     setLoading(true);
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const asDraft = submitter?.value === "draft";
     try {
       const formData = new FormData(event.currentTarget);
       if (activityImages) appendActivityImages(formData, activityImages);
+      if (asDraft) {
+        formData.set("visibility", "draft");
+        if (!String(formData.get("title") || "").trim()) formData.set("title", "未命名草稿");
+      }
       const endpoint = editor.entry
         ? `/api/admin/content/${editor.entry.type}/${encodeURIComponent(editor.entry.slug)}`
         : "/api/admin/content";
-      const data = await saveAdminContent<{ warnings?: string[] }>(endpoint, editor.entry ? "PUT" : "POST", formData);
-      setEditor(null);
-      setMessage(data.warnings?.length
-        ? `内容已保存；${data.warnings.join("；")}。`
-        : "内容已保存，GitHub 正在触发网站重新部署。");
+      const data = await saveAdminContent<{ entry?: ContentRecord; warnings?: string[] }>(endpoint, editor.entry ? "PUT" : "POST", formData);
+      const warningText = data.warnings?.length ? `；${data.warnings.join("；")}` : "";
+      if (asDraft) {
+        // Keep writing: reopen the saved draft so the next save updates it instead of creating another file.
+        if (data.entry) setEditor({ type: data.entry.type, entry: data.entry });
+        setMessage(`草稿已保存到后台，不会出现在公开网站${warningText}。`);
+      } else {
+        setEditor(null);
+        setMessage(warningText ? `内容已保存${warningText}。` : "内容已保存，GitHub 正在触发网站重新部署。");
+      }
       await loadContent();
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "保存失败");
@@ -628,7 +639,7 @@ function ContentEditor({
           </div>
           <footer>
             <p>{mediaConnected ? "媒体会上传到 R2；文字会提交到 GitHub。" : "R2 未连接，可继续保存纯文字或使用已有媒体地址。"}</p>
-            <div><button className="editor-cancel" type="button" onClick={onClose} disabled={loading}>取消</button><button className="editor-save" type="submit" disabled={loading || !canSave}>{loading ? "正在保存……" : !canSave ? "等待 GitHub" : entry ? "保存修改" : "保存记录"}</button></div>
+            <div><button className="editor-cancel" type="button" onClick={onClose} disabled={loading}>取消</button>{!isActivity ? <button className="editor-draft" type="submit" name="intent" value="draft" formNoValidate disabled={loading || !canSave} title="以草稿保存，不公开">保存草稿</button> : null}<button className="editor-save" type="submit" disabled={loading || !canSave}>{loading ? "正在保存……" : !canSave ? "等待 GitHub" : entry ? "保存修改" : "保存记录"}</button></div>
           </footer>
         </form>
       </aside>
