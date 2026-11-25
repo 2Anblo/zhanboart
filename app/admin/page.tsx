@@ -45,7 +45,7 @@ type AssetRecord = {
 type ConnectionState = { configured: boolean; connected: boolean; error?: string };
 type AdminConnection = { github: ConnectionState; r2: ConnectionState };
 type AdminView = "overview" | ContentType | "archive" | "assets";
-type EditorState = { type: ContentType; entry?: ContentRecord } | null;
+type EditorState = { type: ContentType; entry?: ContentRecord; revision?: number } | null;
 
 const disconnected: ConnectionState = { configured: false, connected: false };
 const emptyConnection: AdminConnection = { github: disconnected, r2: disconnected };
@@ -131,15 +131,6 @@ export default function UnifiedContentAdmin() {
       .catch(() => setAuthenticated(false));
   }, []);
 
-  useEffect(() => {
-    if (!editor) return;
-    function closeOnEscape(event: KeyboardEvent) {
-      if (event.key === "Escape" && !loading) setEditor(null);
-    }
-    window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
-  }, [editor, loading]);
-
   const counts = useMemo(() => {
     const result = Object.fromEntries(CONTENT_TYPES.map((type) => [type, 0])) as Record<ContentType, number>;
     entries.forEach((entry) => result[entry.type]++);
@@ -213,7 +204,7 @@ export default function UnifiedContentAdmin() {
       const warningText = data.warnings?.length ? `；${data.warnings.join("；")}` : "";
       if (asDraft) {
         // Keep writing: reopen the saved draft so the next save updates it instead of creating another file.
-        if (data.entry) setEditor({ type: data.entry.type, entry: data.entry });
+        if (data.entry) setEditor({ type: data.entry.type, entry: data.entry, revision: Date.now() });
         setMessage(`草稿已保存到后台，不会出现在公开网站${warningText}。`);
       } else {
         setEditor(null);
@@ -446,7 +437,7 @@ export default function UnifiedContentAdmin() {
 
       {editor ? (
         <ContentEditor
-          key={`${editor.type}-${editor.entry?.slug || "new"}`}
+          key={`${editor.type}-${editor.entry?.slug || "new"}-${editor.revision || 0}`}
           state={editor}
           loading={loading}
           canSave={connection.github.connected}
@@ -584,17 +575,47 @@ function ContentEditor({
   const isActivity = type === "notes";
   const [activityImages, setActivityImages] = useState<ActivityImage[]>(() =>
     (entry?.images || (entry?.image ? [entry.image] : [])).map((url) => ({ url })));
+  const [dirty, setDirty] = useState(false);
+
+  function requestClose() {
+    if (loading) return;
+    if (dirty && !window.confirm("还有未保存的修改，确定关闭吗？关闭后这些内容会丢失。")) return;
+    onClose();
+  }
+
+  useEffect(() => {
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape" || loading) return;
+      event.preventDefault();
+      if (dirty && !window.confirm("还有未保存的修改，确定关闭吗？关闭后这些内容会丢失。")) return;
+      onClose();
+    }
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [dirty, loading, onClose]);
+
+  useEffect(() => {
+    if (!dirty) return;
+    function warnBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [dirty]);
+
   return (
-    <div className="editor-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+    <div className="editor-backdrop" onMouseDown={(event) => event.target === event.currentTarget && requestClose()}>
       <aside className="content-editor" role="dialog" aria-modal="true" aria-labelledby="editor-title">
         <header>
           <div>
             <p className="admin-eyebrow">{entry ? "EDIT RECORD" : "NEW RECORD"} / {type.toUpperCase()}</p>
             <h2 id="editor-title">{isActivity ? (entry ? "编辑动态" : "发布动态") : entry ? entry.title : `新建${CONTENT_TYPE_META[type].singular}`}</h2>
           </div>
-          <button type="button" onClick={onClose} disabled={loading} aria-label="关闭编辑器">×</button>
+          <button type="button" onClick={requestClose} disabled={loading} aria-label="关闭编辑器">×</button>
         </header>
-        <form className="editor-form" onSubmit={(event) => onSave(event, isActivity ? activityImages : undefined)}>
+        <form className="editor-form" onInput={() => setDirty(true)} onChange={() => setDirty(true)}
+          onSubmit={(event) => onSave(event, isActivity ? activityImages : undefined)}>
           <input type="hidden" name="type" value={type} />
           <div className="editor-fields">
             {!isActivity ? <>
@@ -616,7 +637,7 @@ function ContentEditor({
               </>
             ) : null}
 
-            {isActivity ? <div className="field-wide"><ActivityImages images={activityImages} onChange={setActivityImages} disabled={loading} canUpload={mediaConnected} /></div> : null}
+            {isActivity ? <div className="field-wide"><ActivityImages images={activityImages} onChange={(images) => { setActivityImages(images); setDirty(true); }} disabled={loading} canUpload={mediaConnected} /></div> : null}
 
             {!isPhoto && !isMusic && !isActivity ? (
               <MediaFields label="配图（可选）" urlName="image" fileName="imageFile" currentUrl={entry?.image || ""} accept="image/jpeg,image/png,image/webp,image/gif,image/avif" disabled={!mediaConnected} />
@@ -641,7 +662,7 @@ function ContentEditor({
           </div>
           <footer>
             <p>{mediaConnected ? "媒体会上传到 R2；文字会提交到 GitHub。" : "R2 未连接，可继续保存纯文字或使用已有媒体地址。"}</p>
-            <div><button className="editor-cancel" type="button" onClick={onClose} disabled={loading}>取消</button>{!isActivity ? <button className="editor-draft" type="submit" name="intent" value="draft" formNoValidate disabled={loading || !canSave} title="以草稿保存，不公开">保存草稿</button> : null}<button className="editor-save" type="submit" disabled={loading || !canSave}>{loading ? "正在保存……" : !canSave ? "等待 GitHub" : entry ? "保存修改" : "保存记录"}</button></div>
+            <div><button className="editor-cancel" type="button" onClick={requestClose} disabled={loading}>取消</button>{!isActivity ? <button className="editor-draft" type="submit" name="intent" value="draft" formNoValidate disabled={loading || !canSave} title="以草稿保存，不公开">保存草稿</button> : null}<button className="editor-save" type="submit" disabled={loading || !canSave}>{loading ? "正在保存……" : !canSave ? "等待 GitHub" : entry ? "保存修改" : "保存记录"}</button></div>
           </footer>
         </form>
       </aside>
