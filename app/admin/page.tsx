@@ -1,8 +1,10 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import ImageDropZone from "@/components/ImageDropZone";
 import Link from "next/link";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import QuickJournal from "@/components/QuickJournal";
 import { saveAdminContent } from "@/lib/activity-upload-client";
 import ActivityImages, { appendActivityImages, type ActivityImage } from "@/components/ActivityImages";
@@ -628,7 +630,7 @@ function ContentEditor({
               </>
             ) : null}
 
-            {!isActivity ? <label className="field-wide body-field">正文<textarea name="body" rows={14} defaultValue={entry?.body || ""} placeholder="支持 Markdown。写下那些不需要被总结的东西……" /></label> : null}
+            {!isActivity ? <MarkdownBodyField initialValue={entry?.body || ""} /> : null}
             <label>可见性
               <select name="visibility" defaultValue={entry?.visibility || "public"}>
                 <option value="public">公开</option>
@@ -643,6 +645,41 @@ function ContentEditor({
           </footer>
         </form>
       </aside>
+    </div>
+  );
+}
+
+type BodyEditorMode = "write" | "split" | "preview";
+const bodyEditorModes: { mode: BodyEditorMode; label: string }[] = [
+  { mode: "write", label: "编辑" },
+  { mode: "split", label: "分屏" },
+  { mode: "preview", label: "预览" },
+];
+
+function MarkdownBodyField({ initialValue }: { initialValue: string }) {
+  const [body, setBody] = useState(initialValue);
+  const [mode, setMode] = useState<BodyEditorMode>("split");
+  const previewBody = useDeferredValue(body);
+  return (
+    <div className={`body-editor field-wide is-${mode}`}>
+      <div className="body-editor-bar">
+        <label htmlFor="editor-body">正文 <small>Markdown</small></label>
+        <div className="body-editor-modes" role="group" aria-label="正文视图">
+          {bodyEditorModes.map((item) => (
+            <button key={item.mode} type="button" className={mode === item.mode ? "is-active" : ""}
+              aria-pressed={mode === item.mode} onClick={() => setMode(item.mode)}>{item.label}</button>
+          ))}
+        </div>
+      </div>
+      <div className="body-editor-panes">
+        <textarea id="editor-body" name="body" value={body} onChange={(event) => setBody(event.target.value)}
+          placeholder="支持 Markdown。写下那些不需要被总结的东西……" spellCheck={false} />
+        <div className="admin-md-preview" aria-label="正文预览">
+          {previewBody.trim()
+            ? <ReactMarkdown remarkPlugins={[remarkGfm]}>{previewBody}</ReactMarkdown>
+            : <p className="is-empty">预览会显示在这里。</p>}
+        </div>
+      </div>
     </div>
   );
 }
